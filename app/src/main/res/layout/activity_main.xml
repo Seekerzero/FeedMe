@@ -4,15 +4,98 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background_holder"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/food_icon"
+        android:layout_width="57dp"
+        android:layout_height="67dp"
+        android:layout_marginBottom="4dp"
+        android:src="@drawable/pineapple"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/food_tracker_icon1"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:src="@drawable/strawberry"
+        app:layout_constraintStart_toEndOf="@+id/food_tracker_icon2"
+        app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
+
+    <ImageView
+        android:id="@+id/food_tracker_icon2"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:src="@drawable/strawberry"
+        app:layout_constraintStart_toEndOf="@+id/food_tracker_icon3"
+        app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
+
+    <ImageView
+        android:id="@+id/food_tracker_icon3"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:src="@drawable/strawberry"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
+
+    <ImageView
+        android:id="@+id/step_tracker_icon"
+        android:layout_width="71dp"
+        android:layout_height="46dp"
+        android:src="@drawable/footprint"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/awards_icon"
+        android:layout_width="71dp"
+        android:layout_height="46dp"
+        android:src="@drawable/awards"
+        app:layout_constraintBottom_toTopOf="@+id/instructions_icon"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/instructions_icon"
+        android:layout_width="71dp"
+        android:layout_height="46dp"
+        android:src="@drawable/question_mark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/mochi"
+        android:layout_width="500dp"
+        android:layout_height="500dp"
+        android:src="@drawable/green_mochi_happy"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.653" />
+
     <TextView
+        android:id="@+id/mochi_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:paddingRight="50dp"
+        android:textColor="@color/blue"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Mochi Name" />
+
+    <TextView
+        android:id="@+id/mochi_age"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingRight="50dp"
+        android:textColor="@color/blue"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mochi_name"
+        tools:text="Mochi Age" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
