@@ -9,17 +9,17 @@
 
     <ImageView
         android:id="@+id/food_icon"
-        android:layout_width="57dp"
-        android:layout_height="67dp"
-        android:layout_marginBottom="4dp"
+        android:layout_width="100dp"
+        android:layout_height="146dp"
+        android:paddingBottom="50dp"
         android:src="@drawable/pineapple"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
-        android:id="@+id/food_tracker_icon1"
+        android:id="@+id/food_tracker_icon3"
         android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:src="@drawable/strawberry"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon2"
         app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
@@ -27,40 +27,43 @@
     <ImageView
         android:id="@+id/food_tracker_icon2"
         android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:src="@drawable/strawberry"
-        app:layout_constraintStart_toEndOf="@+id/food_tracker_icon3"
+        app:layout_constraintStart_toEndOf="@+id/food_tracker_icon1"
         app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
 
     <ImageView
-        android:id="@+id/food_tracker_icon3"
+        android:id="@+id/food_tracker_icon1"
         android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_height="40dp"
         android:src="@drawable/strawberry"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
 
-    <ImageView
+    <Button
         android:id="@+id/step_tracker_icon"
-        android:layout_width="71dp"
+        android:layout_width="46dp"
         android:layout_height="46dp"
-        android:src="@drawable/footprint"
+        android:background="@drawable/footprint"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
+    <Button
         android:id="@+id/awards_icon"
-        android:layout_width="71dp"
-        android:layout_height="46dp"
-        android:src="@drawable/awards"
-        app:layout_constraintBottom_toTopOf="@+id/instructions_icon"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:layout_marginBottom="44dp"
+        android:background="@drawable/awards"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/instructions_icon" />
 
-    <ImageView
+    <Button
         android:id="@+id/instructions_icon"
-        android:layout_width="71dp"
-        android:layout_height="46dp"
-        android:src="@drawable/question_mark"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="48dp"
+        android:background="@drawable/question_mark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -76,22 +79,23 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.653" />
 
-    <TextView
+    <EditText
         android:id="@+id/mochi_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingRight="50dp"
+        android:paddingRight="30dp"
         android:textColor="@color/blue"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="Mochi Name" />
+        tools:text="Mochi Name"
+        android:hint="Mochi Name" />
 
     <TextView
         android:id="@+id/mochi_age"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingRight="50dp"
+        android:paddingRight="30dp"
         android:textColor="@color/blue"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
