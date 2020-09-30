@@ -1,4 +1,5 @@
 UI 
+-----------------------
 - Awards gallery (SL)
 - Fragment for awards description (SL)
 - Get and import all mochis 
@@ -9,6 +10,7 @@ UI
 
 
 Back end
+-----------------------
 - Create Awards model object + view model (SL)
 - Create list of possible awards (descriptions in res/strings) (SL)
 - Step counter functionality (ZH) 
