@@ -22,7 +22,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessOptions
+import com.google.android.gms.fitness.data.DataSet
 import com.google.android.gms.fitness.data.DataType
+import com.google.android.gms.fitness.data.Field
 import com.google.android.gms.fitness.request.DataReadRequest
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -36,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mochi_age_label: TextView
     private lateinit var mochi_icon: ImageView
     private lateinit var food_icon: ImageView
-    private lateinit var step_counter: TextView // TODO
+    private lateinit var step_counter: TextView
     private lateinit var food_tracker_icon_1: ImageView
     private lateinit var food_tracker_icon_2: ImageView
     private lateinit var food_tracker_icon_3: ImageView
@@ -47,6 +49,8 @@ class MainActivity : AppCompatActivity() {
 
     var fitnessOptions = FitnessOptions.builder()
         .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+        .addDataType(DataType.TYPE_STEP_COUNT_CUMULATIVE, FitnessOptions.ACCESS_READ)
+        .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
         .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
         .build()
 
@@ -68,10 +72,13 @@ class MainActivity : AppCompatActivity() {
         food_tracker_icon_3.setColorFilter(R.color.gray)
         awards_button = findViewById(R.id.awards_icon)
         instructions_button = findViewById(R.id.instructions_icon)
+        step_counter = findViewById(R.id.step_tracker_number)
 
 
         fitAuthorization()
         getGoogleAccount()
+        subscribe()
+        getCurStepCount()
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
@@ -202,7 +209,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun getGoogleAccount(){
+    private fun getGoogleAccount(){
 
         var account: GoogleSignInAccount = if(GoogleSignIn.getLastSignedInAccount(this) != null){
             GoogleSignIn.getLastSignedInAccount(this)!!
@@ -215,7 +222,8 @@ class MainActivity : AppCompatActivity() {
                 this, // your activity
                 GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
                 account,
-                fitnessOptions);
+                fitnessOptions
+            );
         } else {
             accessGoogleFit();
         }
@@ -268,9 +276,74 @@ class MainActivity : AppCompatActivity() {
             .readData(readRequest)
             .addOnSuccessListener { response ->
                 // Use response data here
-                Log.d(TAG, "OnSuccess()")
+                Log.d(TAG, "Fitness.getHistoryClient OnSuccess()")
             }
-            .addOnFailureListener { e -> Log.d(TAG, "OnFailure()", e) }
+            .addOnFailureListener { e -> Log.d(TAG, "Fitness.getHistoryClient OnFailure()", e) }
     }
+
+    fun subscribe() {
+        Fitness.getRecordingClient(this, GoogleSignIn.getAccountForExtension(this, fitnessOptions))
+            .listSubscriptions(DataType.TYPE_STEP_COUNT_CUMULATIVE)
+            .addOnSuccessListener { subscriptions ->
+                for (sc in subscriptions) {
+                    val dt: DataType? = sc.dataType
+                    if (dt != null) {
+                        Log.i(TAG, "Active subscription for data type: " + dt.name)
+                        if(dt.name == "com.google.step_count.cumulative")
+                        {
+                            Log.i(
+                                TAG,
+                                "com.google.step_count.cumulative is already activated no need to subscribe again"
+                            )
+                        }
+                    }
+                    else{
+                        // To create a subscription, invoke the Recording API. As soon as the subscription is
+                        // active, fitness data will start recording.
+                        Log.d(TAG, "Start to subscribe TYPE_STEP_COUNT_CUMULATIVE ")
+                        Fitness.getRecordingClient(
+                            this, GoogleSignIn.getAccountForExtension(
+                                this,
+                                fitnessOptions
+                            )
+                        )
+                            .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
+                            .addOnSuccessListener { unused: Void? ->
+                                Log.i(
+                                    TAG,
+                                    "Subscription for TYPE_STEP_COUNT_CUMULATIVE was successful!"
+                                )
+                            }
+                            .addOnFailureListener { e: Exception ->
+                                Log.i(
+                                    TAG, "There was a problem subscribing: " +
+                                            e.localizedMessage
+                                )
+                            }
+                    }
+                }
+            }
+    }
+
+    private fun getCurStepCount(){
+        Fitness.getHistoryClient(this, GoogleSignIn.getAccountForExtension(this, fitnessOptions))
+            .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
+            .addOnSuccessListener { result: DataSet ->
+                val curSteps =
+                    if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
+                        .asInt()
+                Log.d(TAG, "current Step Count: $curSteps")
+                step_counter.text = curSteps.toString()
+            }
+            .addOnFailureListener { e: java.lang.Exception ->
+                Log.i(
+                    TAG, "There was a problem getting steps: " +
+                            e.localizedMessage
+                )
+            }
+
+    }
+
+
 
 }

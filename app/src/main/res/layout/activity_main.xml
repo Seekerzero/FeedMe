@@ -40,13 +40,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
 
-    <Button
+    <ImageView
         android:id="@+id/step_tracker_icon"
         android:layout_width="46dp"
         android:layout_height="46dp"
         android:background="@drawable/footprint"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/step_tracker_number"
+        android:layout_width="wrap_content"
+        android:layout_height="46dp"
+        android:textAlignment="center"
+        android:paddingLeft="20dp"
+        android:textSize="30sp"
+        app:layout_constraintStart_toEndOf="@id/step_tracker_icon"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
         android:id="@+id/awards_icon"
