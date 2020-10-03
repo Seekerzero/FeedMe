@@ -4,9 +4,11 @@ import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -23,9 +25,17 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessOptions
 import com.google.android.gms.fitness.data.DataSet
+import com.google.android.gms.fitness.data.DataSource
+import com.google.android.gms.fitness.data.DataSource.TYPE_DERIVED
 import com.google.android.gms.fitness.data.DataType
+import com.google.android.gms.fitness.data.DataType.AGGREGATE_STEP_COUNT_DELTA
+import com.google.android.gms.fitness.data.DataType.TYPE_STEP_COUNT_DELTA
 import com.google.android.gms.fitness.data.Field
 import com.google.android.gms.fitness.request.DataReadRequest
+import com.google.android.gms.fitness.result.DataReadResponse
+import com.google.android.gms.tasks.Task
+import java.text.DateFormat
+import java.text.DateFormat.getDateInstance
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -186,8 +196,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
         getCurStepCount()
+        refresh(1000)
+
     }
+
+    private fun refresh(timeSteps: Long){
+        var handler: Handler = Handler()
+        var runnable: Runnable = Runnable {
+            kotlin.run {
+                onResume()
+            }
+        }
+        handler.postDelayed(runnable,timeSteps)
+    }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -332,7 +356,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCurStepCount(){
         Fitness.getHistoryClient(this, GoogleSignIn.getAccountForExtension(this, fitnessOptions))
-            .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
+            .readDailyTotalFromLocalDevice(DataType.TYPE_STEP_COUNT_DELTA)
             .addOnSuccessListener { result: DataSet ->
                 val curSteps =
                     if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
@@ -346,6 +370,8 @@ class MainActivity : AppCompatActivity() {
                             e.localizedMessage
                 )
             }
+
+
 
     }
 
