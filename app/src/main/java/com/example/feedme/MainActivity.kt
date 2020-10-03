@@ -1,8 +1,11 @@
 package com.example.feedme
 
+import android.Manifest
 import android.content.ClipData
 import android.content.ClipDescription
+import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,9 +16,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 private const val TAG = "MainActivity"
+private const val MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION = 0
 class MainActivity : AppCompatActivity() {
     private lateinit var mochi_name_label: EditText
     private lateinit var mochi_age_label: TextView
@@ -47,6 +54,8 @@ class MainActivity : AppCompatActivity() {
         food_tracker_icon_3.setColorFilter(R.color.gray)
         awards_button = findViewById(R.id.awards_icon)
         instructions_button = findViewById(R.id.instructions_icon)
+
+        fitAuthorization()
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
@@ -150,5 +159,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    fun fitAuthorization(){
+        when {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
+                    != PackageManager.PERMISSION_GRANTED ->{
+                requestPermissions(arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION)
+            }
+            else -> {
+                // Permission is already granted, do nothing
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // Permission is granted. Nothing happened
+                } else {
+                    // should disable the step counter here
+                }
+                return
+            }
+            // Add other 'when' lines to check for other
+            // permissions this app might request (gps).
+            else -> {
+            }
+        }
     }
 }
