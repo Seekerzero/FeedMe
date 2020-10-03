@@ -1,9 +1,9 @@
 package com.example.feedme
 
 import android.Manifest
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -16,13 +16,21 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.fitness.Fitness
+import com.google.android.gms.fitness.FitnessOptions
+import com.google.android.gms.fitness.data.DataType
+import com.google.android.gms.fitness.request.DataReadRequest
+import java.util.*
+import java.util.concurrent.TimeUnit
+
 
 private const val TAG = "MainActivity"
 private const val MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION = 0
+private const val GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 1
 class MainActivity : AppCompatActivity() {
     private lateinit var mochi_name_label: EditText
     private lateinit var mochi_age_label: TextView
@@ -36,6 +44,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var instructions_button: Button
     private var mochi_name: String? = null
     var mealsEaten = 0
+
+    var fitnessOptions = FitnessOptions.builder()
+        .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+        .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+        .build()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +69,9 @@ class MainActivity : AppCompatActivity() {
         awards_button = findViewById(R.id.awards_icon)
         instructions_button = findViewById(R.id.instructions_icon)
 
+
         fitAuthorization()
+        getGoogleAccount()
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
@@ -161,11 +177,24 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
+                accessGoogleFit()
+            }
+        }
+    }
+
+
     fun fitAuthorization(){
         when {
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
                     != PackageManager.PERMISSION_GRANTED ->{
-                requestPermissions(arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION)
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
+                    MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION
+                )
             }
             else -> {
                 // Permission is already granted, do nothing
@@ -173,14 +202,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    fun getGoogleAccount(){
+
+        var account: GoogleSignInAccount = if(GoogleSignIn.getLastSignedInAccount(this) != null){
+            GoogleSignIn.getLastSignedInAccount(this)!!
+        }else{
+            GoogleSignIn.getAccountForExtension(this, fitnessOptions)
+        }
+
+        if (!GoogleSignIn.hasPermissions(account, fitnessOptions)) {
+            GoogleSignIn.requestPermissions(
+                this, // your activity
+                GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
+                account,
+                fitnessOptions);
+        } else {
+            accessGoogleFit();
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION -> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() &&
-                            grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                ) {
                     // Permission is granted. Nothing happened
                 } else {
                     // should disable the step counter here
@@ -193,4 +245,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun accessGoogleFit() {
+        val cal: Calendar = Calendar.getInstance()
+        cal.setTime(Date())
+        val endTime: Long = cal.getTimeInMillis()
+        cal.add(Calendar.YEAR, -1)
+        val startTime: Long = cal.getTimeInMillis()
+        val readRequest = DataReadRequest.Builder()
+            .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+            .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+            .bucketByTime(1, TimeUnit.DAYS)
+            .build()
+
+        var account: GoogleSignInAccount = if(GoogleSignIn.getLastSignedInAccount(this) != null){
+            GoogleSignIn.getLastSignedInAccount(this)!!
+        }else{
+            GoogleSignIn.getAccountForExtension(this, fitnessOptions)
+        }
+
+        Fitness.getHistoryClient(this, account)
+            .readData(readRequest)
+            .addOnSuccessListener { response ->
+                // Use response data here
+                Log.d(TAG, "OnSuccess()")
+            }
+            .addOnFailureListener { e -> Log.d(TAG, "OnFailure()", e) }
+    }
+
 }
