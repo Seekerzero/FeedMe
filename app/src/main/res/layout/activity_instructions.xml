@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingRight="30dp"
-        android:text="Achievements!"
+        android:text="Instruction"
         android:textColor="@color/blue"
         android:textSize="50sp"
         app:layout_constraintEnd_toEndOf="parent"
