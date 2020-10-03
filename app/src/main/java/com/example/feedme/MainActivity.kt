@@ -99,7 +99,8 @@ class MainActivity : AppCompatActivity() {
 
         instructions_button.setOnClickListener {
             Log.d(TAG, "Instruction button clicked")
-            // TODO: GO TO OTHER SCREEN
+            val intent = Intent(this, InstructionsActivity::class.java)
+            startActivity(intent)
         }
     }
 

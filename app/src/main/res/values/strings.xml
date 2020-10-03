@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FeedMe</string>
+    <string name="instructions_body">Just like you, your mochi needs to eat at least 3 times a day. To feed your mochi, drag and drop the food icon at the bottom right of your screen. To keep your mochi healthy, take lots of walks. If you are healthy, so is your mochi! You can also rename your mochi if you like. Get cool awards for keeping up the good work!</string>
+    <string name="award_healthy_heart_description">Walk more than 1,000 steps 7 days in a row.</string>
+    <string name="award_strong_eater_description">Eat 3 meals a day 7 days in a row.</string>
+    <string name="award_description_null">Award description null</string>
 </resources>

@@ -12,13 +12,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingRight="30dp"
+        android:text="Achievements!"
         android:textColor="@color/blue"
         android:textSize="50sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="Achievements!" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/award_gallery"
@@ -28,22 +28,32 @@
         android:src="@drawable/pineapple"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.888"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/achievements_title"
-        app:layout_constraintVertical_bias="0.198" />
+        app:layout_constraintVertical_bias="0.182" />
 
     <ImageView
-        android:id="@+id/award_description"
-        android:layout_width="155dp"
-        android:layout_height="92dp"
+        android:id="@+id/award_gallery2"
+        android:layout_width="168dp"
+        android:layout_height="137dp"
         android:background="@color/white"
         android:src="@drawable/strawberry"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.197"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/achievements_title"
+        app:layout_constraintVertical_bias="0.182" />
+
+    <FrameLayout
+        android:id="@+id/awards_description_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/award_gallery" />
+        app:layout_constraintTop_toBottomOf="@+id/award_gallery"></FrameLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
