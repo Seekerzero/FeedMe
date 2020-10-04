@@ -49,6 +49,7 @@ class AwardDetailFragment : Fragment() {
         )
         award_date_label.text = (current_award?.award_date?.toString()
             ?: "Date earned") // TODO when user gets award, set date!
+
     }
 
     companion object {

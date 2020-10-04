@@ -79,15 +79,15 @@
 
     <ImageView
         android:id="@+id/mochi"
-        android:layout_width="500dp"
-        android:layout_height="500dp"
+        android:layout_width="390dp"
+        android:layout_height="335dp"
         android:src="@drawable/green_mochi_happy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.653" />
+        app:layout_constraintVertical_bias="0.61" />
 
     <EditText
         android:id="@+id/mochi_name"

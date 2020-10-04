@@ -22,7 +22,6 @@ class AwardsActivity : AppCompatActivity() {
         achievement_grid_placeholder = findViewById(R.id.award_gallery)
         achievement_grid_placeholder2 = findViewById(R.id.award_gallery2)
 
-
         //award on click for each button
         achievement_grid_placeholder.setOnClickListener {
             changeDetailFragment(Awards.HEALTHY_HEART.awardName)
@@ -34,8 +33,6 @@ class AwardsActivity : AppCompatActivity() {
             changeDetailFragment(Awards.STRONG_EATER.awardName)
             Log.d(TAG, "Strong eater Award pressed!")
         }
-
-
     }
 
     fun changeDetailFragment(award_name: String) {
@@ -43,7 +40,6 @@ class AwardsActivity : AppCompatActivity() {
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.awards_description_fragment_container, fragment)
-            .addToBackStack(null)
             .commit()
         Log.d(TAG, "Switch out award detail fragment")
     }

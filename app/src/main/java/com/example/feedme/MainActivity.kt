@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -25,17 +24,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessOptions
 import com.google.android.gms.fitness.data.DataSet
-import com.google.android.gms.fitness.data.DataSource
-import com.google.android.gms.fitness.data.DataSource.TYPE_DERIVED
 import com.google.android.gms.fitness.data.DataType
-import com.google.android.gms.fitness.data.DataType.AGGREGATE_STEP_COUNT_DELTA
-import com.google.android.gms.fitness.data.DataType.TYPE_STEP_COUNT_DELTA
 import com.google.android.gms.fitness.data.Field
 import com.google.android.gms.fitness.request.DataReadRequest
-import com.google.android.gms.fitness.result.DataReadResponse
-import com.google.android.gms.tasks.Task
-import java.text.DateFormat
-import java.text.DateFormat.getDateInstance
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -151,11 +142,11 @@ class MainActivity : AppCompatActivity() {
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 Log.d(TAG, "Action drag started")
-                mochi_icon.setImageResource(R.drawable.green_mochi_eat_happy)
                 true
             }
             DragEvent.ACTION_DRAG_ENTERED -> {
                 Log.d(TAG, "Action drag entered")
+                mochi_icon.setImageResource(R.drawable.green_mochi_eat_happy)
                 true
             }
             DragEvent.ACTION_DRAG_LOCATION -> {
@@ -163,27 +154,34 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             DragEvent.ACTION_DRAG_EXITED -> {
-                // no longer within view's box, ignore for now TODO
+                mochi_icon.setImageResource(R.drawable.green_mochi_ok)
                 Log.d(TAG, "Action drag exited")
                 true
             }
             DragEvent.ACTION_DROP -> {
                 Log.d(TAG, "Action drop")
+                // mochi happy
+                mealsEaten++
+
+                // make a strawberry bright
+                if (mealsEaten == 1) {
+                    food_tracker_icon_1.clearColorFilter()
+                    mochi_icon.setImageResource(R.drawable.green_mochi_happy)
+                    mochi_icon.maxHeight = 500
+                    mochi_icon.maxWidth = 500
+
+                } else if (mealsEaten == 2) {
+                    food_tracker_icon_2.clearColorFilter()
+                    mochi_icon.setImageResource(R.drawable.green_mochi_happy)
+                } else if (mealsEaten == 3) {
+                    food_tracker_icon_3.clearColorFilter()
+                    mochi_icon.setImageResource(R.drawable.green_mochi_super_happy)
+                }
                 true
             }
             DragEvent.ACTION_DRAG_ENDED -> {
                 Log.d(TAG, "Action drag ended")
-                // mochi happy
-                mealsEaten++
-                mochi_icon.setImageResource(R.drawable.green_mochi_super_happy)
-                // make a strawberry bright
-                if (mealsEaten == 1) {
-                    food_tracker_icon_1.clearColorFilter()
-                } else if (mealsEaten == 2) {
-                    food_tracker_icon_2.clearColorFilter()
-                } else if (mealsEaten == 3) {
-                    food_tracker_icon_3.clearColorFilter()
-                }
+
                 true
             }
             else -> {
@@ -196,7 +194,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
         getCurStepCount()
         refresh(1000)
 
