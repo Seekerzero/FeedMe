@@ -173,7 +173,7 @@ class MainActivity : AppCompatActivity() {
                 } else if (mealsEaten == 2) {
                     food_tracker_icon_2.clearColorFilter()
                     mochi_icon.setImageResource(R.drawable.green_mochi_happy)
-                } else if (mealsEaten == 3) {
+                } else if (mealsEaten >= 3) {
                     food_tracker_icon_3.clearColorFilter()
                     mochi_icon.setImageResource(R.drawable.green_mochi_super_happy)
                 }
