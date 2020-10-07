@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:background="@drawable/us_background"
     tools:context=".MainActivity">
 
 
@@ -73,11 +73,12 @@
         android:id="@+id/step_tracker_number"
         android:layout_width="76dp"
         android:layout_height="37dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:paddingLeft="20dp"
-        android:textAlignment="center"
-        android:textSize="30sp"
+        android:textAlignment="viewStart"
         android:textColor="@color/white"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="@+id/step_tracker_icon"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -102,15 +103,15 @@
 
     <ImageView
         android:id="@+id/mochi"
-        android:layout_width="390dp"
-        android:layout_height="335dp"
+        android:layout_width="251dp"
+        android:layout_height="196dp"
         android:src="@drawable/green_mochi_happy"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.61" />
+        app:layout_constraintVertical_bias="0.693" />
 
     <EditText
         android:id="@+id/mochi_name"
@@ -120,6 +121,7 @@
         android:paddingRight="30dp"
         android:textColor="@color/blue"
         android:textSize="16sp"
+        android:backgroundTint="@color/blue"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Mochi Name" />

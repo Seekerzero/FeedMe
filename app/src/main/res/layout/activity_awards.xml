@@ -20,39 +20,99 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/award_gallery"
-        android:layout_width="168dp"
-        android:layout_height="137dp"
-        android:background="@color/white"
-        android:src="@drawable/pineapple"
-        app:layout_constraintBottom_toBottomOf="parent"
+
+    <TextView
+        android:id="@+id/constraint_helper"
+        android:layout_width="315dp"
+        android:layout_height="302dp"
+        app:layout_constraintBottom_toTopOf="@+id/awards_description_fragment_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.888"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/achievements_title"
-        app:layout_constraintVertical_bias="0.182" />
+        app:layout_constraintTop_toBottomOf="@+id/achievements_title" />
 
     <ImageView
-        android:id="@+id/award_gallery2"
-        android:layout_width="168dp"
-        android:layout_height="137dp"
-        android:background="@color/white"
-        android:src="@drawable/strawberry"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.197"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/achievements_title"
-        app:layout_constraintVertical_bias="0.182" />
+        android:id="@+id/health_7"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/health_7"
+        app:layout_constraintStart_toEndOf="@+id/health_1"
+        app:layout_constraintTop_toBottomOf="@+id/walk_2000_7" />
+
+    <ImageView
+        android:id="@+id/walk_5000_1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/walk_5000_1_day"
+        app:layout_constraintStart_toEndOf="@+id/walk_2000_7"
+        app:layout_constraintTop_toTopOf="@+id/walk_2000_7" />
+
+    <ImageView
+        android:id="@+id/walk_2000_7"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/walk_2000_7days"
+        app:layout_constraintStart_toEndOf="@+id/walk_2000_1"
+        app:layout_constraintTop_toTopOf="@+id/constraint_helper" />
+
+    <ImageView
+        android:id="@+id/walk_2000_1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/walk_2000_1day"
+        app:layout_constraintStart_toStartOf="@+id/constraint_helper"
+        app:layout_constraintTop_toTopOf="@+id/constraint_helper" />
+
+    <ImageView
+        android:id="@+id/health_30"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/health_30"
+        app:layout_constraintStart_toEndOf="@+id/health_7"
+        app:layout_constraintTop_toBottomOf="@+id/walk_5000_1" />
+
+    <ImageView
+        android:id="@+id/age_100_days"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/age_100_days"
+        app:layout_constraintStart_toEndOf="@+id/happy_medal"
+        app:layout_constraintTop_toBottomOf="@+id/health_30" />
 
     <FrameLayout
         android:id="@+id/awards_description_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_width="403dp"
+        android:layout_height="125dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/award_gallery"></FrameLayout>
+        app:layout_constraintTop_toBottomOf="@+id/constraint_helper">
+
+    </FrameLayout>
+
+    <ImageView
+        android:id="@+id/happy_medal"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/happy_mochi_medal"
+        app:layout_constraintStart_toEndOf="@+id/japan_medal"
+        app:layout_constraintTop_toBottomOf="@+id/health_7" />
+
+    <ImageView
+        android:id="@+id/health_1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/health_1"
+        app:layout_constraintStart_toStartOf="@+id/constraint_helper"
+        app:layout_constraintTop_toBottomOf="@+id/walk_2000_1" />
+
+    <ImageView
+        android:id="@+id/japan_medal"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/japan_medal"
+        app:layout_constraintStart_toStartOf="@+id/constraint_helper"
+        app:layout_constraintTop_toBottomOf="@+id/health_1" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
