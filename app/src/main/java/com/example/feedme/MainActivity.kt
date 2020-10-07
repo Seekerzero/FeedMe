@@ -19,6 +19,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.fitness.Fitness
@@ -27,6 +28,8 @@ import com.google.android.gms.fitness.data.DataSet
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.data.Field
 import com.google.android.gms.fitness.request.DataReadRequest
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -34,6 +37,7 @@ import java.util.concurrent.TimeUnit
 private const val TAG = "MainActivity"
 private const val MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION = 0
 private const val GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 1
+private const val GPS_PERMISSIONS_REQUEST_CODE = 2
 class MainActivity : AppCompatActivity() {
     private lateinit var mochi_name_label: EditText
     private lateinit var mochi_age_label: TextView
@@ -46,7 +50,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var awards_button: Button
     private lateinit var instructions_button: Button
     private var mochi_name: String? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var steps: Long = 0
     var mealsEaten = 0
+
+    private val dailyInfoListViewModel: DailyInfoListViewModel by lazy {
+        ViewModelProviders.of(this).get(DailyInfoListViewModel::class.java)
+    }
 
     var fitnessOptions = FitnessOptions.builder()
         .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
@@ -59,6 +69,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        dailyInfoListViewModel.initializeWithDummyData()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
 
         // Wire up widgets
         mochi_name_label = findViewById(R.id.mochi_name)
@@ -80,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         getGoogleAccount()
         subscribe()
         getCurStepCount()
+        gpsAuthorization()
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
@@ -96,8 +110,7 @@ class MainActivity : AppCompatActivity() {
                 before: Int, count: Int
             ) {
                 mochi_name = s.toString()
-                Log.d(TAG, "Mochi name changed")
-                mochi_name_label.setTextColor(getResources().getColor(R.color.blue))
+                mochi_name_label.setTextColor(getResources().getColor(R.color.white))
             }
         })
 
@@ -135,17 +148,16 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, InstructionsActivity::class.java)
             startActivity(intent)
         }
+
     }
 
     // for dragging food to mochi
     private val dragListen = View.OnDragListener { v, event ->
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
-                Log.d(TAG, "Action drag started")
                 true
             }
             DragEvent.ACTION_DRAG_ENTERED -> {
-                Log.d(TAG, "Action drag entered")
                 mochi_icon.setImageResource(R.drawable.green_mochi_eat_happy)
                 true
             }
@@ -155,11 +167,9 @@ class MainActivity : AppCompatActivity() {
             }
             DragEvent.ACTION_DRAG_EXITED -> {
                 mochi_icon.setImageResource(R.drawable.green_mochi_ok)
-                Log.d(TAG, "Action drag exited")
                 true
             }
             DragEvent.ACTION_DROP -> {
-                Log.d(TAG, "Action drop")
                 // mochi happy
                 mealsEaten++
 
@@ -180,12 +190,9 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             DragEvent.ACTION_DRAG_ENDED -> {
-                Log.d(TAG, "Action drag ended")
-
                 true
             }
             else -> {
-                Log.d(TAG, "Some other drag event" + event.action.toString())
                 false
             }
         }
@@ -206,7 +213,7 @@ class MainActivity : AppCompatActivity() {
                 onResume()
             }
         }
-        handler.postDelayed(runnable,timeSteps)
+        handler.postDelayed(runnable, timeSteps)
     }
 
 
@@ -219,11 +226,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // update with daily info
+        Log.d(TAG, "Updating daily info database")
+        try {
 
-    fun fitAuthorization(){
+//            dailyInfoListViewModel.addDailyInfo(DailyInfo(Date(), steps, mealsEaten))
+        } catch (e: Exception) {
+            Log.e(TAG, e.localizedMessage)
+        }
+    }
+
+    fun fitAuthorization() {
         when {
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
-                    != PackageManager.PERMISSION_GRANTED ->{
+                    != PackageManager.PERMISSION_GRANTED -> {
                 requestPermissions(
                     arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
                     MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION
@@ -235,11 +253,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getGoogleAccount(){
+    // TODO: SABRINA IS DUMB AND CANNOT GET THIS TO WORK
+    fun gpsAuthorization() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                // You can use the API that requires the permission.
+                Log.d(TAG, "Yay")
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) -> {
+                // In an educational UI, explain to the user why your app requires this
+                // permission for a specific feature to behave as expected. In this UI,
+                // include a "cancel" or "no thanks" button that allows the user to
+                // continue using your app without granting the permission.
+                Log.d(TAG, "Sad rationale, why no permission?")
+            }
+            else -> {
+                // Directly ask for the permission.
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
+                    GPS_PERMISSIONS_REQUEST_CODE
+                )
+            }
+        }
+    }
 
-        var account: GoogleSignInAccount = if(GoogleSignIn.getLastSignedInAccount(this) != null){
+    private fun getGoogleAccount() {
+
+        var account: GoogleSignInAccount = if (GoogleSignIn.getLastSignedInAccount(this) != null) {
             GoogleSignIn.getLastSignedInAccount(this)!!
-        }else{
+        } else {
             GoogleSignIn.getAccountForExtension(this, fitnessOptions)
         }
 
@@ -256,6 +301,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //TODO NOTE TO ZHANHONG I ALSO ADDED SOMETHING HERE
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -273,8 +319,17 @@ class MainActivity : AppCompatActivity() {
                 }
                 return
             }
-            // Add other 'when' lines to check for other
-            // permissions this app might request (gps).
+            // this does not work :(
+            GPS_PERMISSIONS_REQUEST_CODE -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // Permission is granted. Nothing happened
+                    Log.d(TAG, "yay, permission granted")
+                } else {
+                    // permission not granted. Sadness
+                    Log.d(TAG, "bruh")
+                }
+                return
+            }
             else -> {
             }
         }
@@ -358,7 +413,8 @@ class MainActivity : AppCompatActivity() {
                 val curSteps =
                     if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
                         .asInt()
-                Log.d(TAG, "current Step Count: $curSteps")
+//                Log.d(TAG, "current Step Count: $curSteps")
+                steps = curSteps.toLong()
                 step_counter.text = curSteps.toString()
             }
             .addOnFailureListener { e: java.lang.Exception ->
