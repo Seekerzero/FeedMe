@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -18,12 +17,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignIn.requestPermissions
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessOptions
@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var steps: Long = 0
     var mealsEaten = 0
-    var stepCounterEnabled: Boolean = false
+    var stepCounterEnabled: Boolean = true
     val Permissions = mutableListOf<String>()
     var permissionResult = IntArray(1)
 
@@ -276,7 +276,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 !shouldShowRequestPermissionRationale(permission)->{
                     Log.d(TAG, "Requesting $permission")
-                    showExplanation("We need your permission","On ${getPermissionName(permission)}",permission,getPermissionCode(permission))
+                    showExplanation(
+                        "We need your permission",
+                        "On ${getPermissionName(permission)}",
+                        permission,
+                        getPermissionCode(
+                            permission
+                        )
+                    )
                 }
                 else -> {
                 }
@@ -285,15 +292,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showExplanation(
-            title: String,
-            message: String,
-            permission: String,
-            permissionRequestCode: Int
-        ) {
+        title: String,
+        message: String,
+        permission: String,
+        permissionRequestCode: Int
+    ) {
             val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(this)
             builder.setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok
+                .setPositiveButton(
+                    android.R.string.ok
                 ) { dialog, id ->
                     requestPermissions(
                         arrayOf(permission), getPermissionCode(permission)
@@ -342,6 +350,7 @@ class MainActivity : AppCompatActivity() {
                     subscribe()
                 } else {
                     // should disable the step counter here
+                    stepCounterEnabled = false
                     Log.d(TAG, "fit permission is not granted")
                 }
                 return
