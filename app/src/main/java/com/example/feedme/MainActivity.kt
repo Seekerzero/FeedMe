@@ -19,6 +19,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -30,14 +31,14 @@ import com.google.android.gms.fitness.data.Field
 import com.google.android.gms.fitness.request.DataReadRequest
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 
 private const val TAG = "MainActivity"
-private const val MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION = 0
+private const val MY_PERMISSIONS_REQUEST_ACTIVITY= 0
 private const val GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 1
-private const val GPS_PERMISSIONS_REQUEST_CODE = 2
 class MainActivity : AppCompatActivity() {
     private lateinit var mochi_name_label: EditText
     private lateinit var mochi_age_label: TextView
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var steps: Long = 0
     var mealsEaten = 0
+    var stepCounterEnabled: Boolean = false
 
     private val dailyInfoListViewModel: DailyInfoListViewModel by lazy {
         ViewModelProviders.of(this).get(DailyInfoListViewModel::class.java)
@@ -69,6 +71,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Authorization()
+
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -89,11 +93,6 @@ class MainActivity : AppCompatActivity() {
         step_counter = findViewById(R.id.step_tracker_number)
 
 
-        fitAuthorization()
-        getGoogleAccount()
-        subscribe()
-        getCurStepCount()
-        gpsAuthorization()
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
@@ -238,49 +237,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun fitAuthorization() {
+    private fun Authorization() {
         when {
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
+                    != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED -> {
+                Log.d(TAG, "Requesting FIT Permission")
                 requestPermissions(
-                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                    MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION
+                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                    MY_PERMISSIONS_REQUEST_ACTIVITY
                 )
             }
             else -> {
-                // Permission is already granted, do nothing
+                Log.d(TAG, "FIT Permission already granted")
+                subscribe()
+                stepCounterEnabled = true
             }
         }
     }
 
-    // TODO: SABRINA IS DUMB AND CANNOT GET THIS TO WORK
-    fun gpsAuthorization() {
-        when {
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED -> {
-                // You can use the API that requires the permission.
-                Log.d(TAG, "Yay")
-            }
-            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) -> {
-                // In an educational UI, explain to the user why your app requires this
-                // permission for a specific feature to behave as expected. In this UI,
-                // include a "cancel" or "no thanks" button that allows the user to
-                // continue using your app without granting the permission.
-                Log.d(TAG, "Sad rationale, why no permission?")
-            }
-            else -> {
-                // Directly ask for the permission.
-                requestPermissions(
-                    arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),
-                    GPS_PERMISSIONS_REQUEST_CODE
-                )
-            }
-        }
-    }
 
-    private fun getGoogleAccount() {
+    private fun prepareGoogleFitClient() {
 
         var account: GoogleSignInAccount = if (GoogleSignIn.getLastSignedInAccount(this) != null) {
             GoogleSignIn.getLastSignedInAccount(this)!!
@@ -308,29 +285,30 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
-            MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION -> {
+            MY_PERMISSIONS_REQUEST_ACTIVITY-> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() &&
                             grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 ) {
-                    // Permission is granted. Nothing happened
+                    Log.d(TAG, "yay, fit permission granted")
+                    stepCounterEnabled = true
+                    prepareGoogleFitClient()
+                    subscribe()
                 } else {
                     // should disable the step counter here
+                    Log.d(TAG, "fit permission is not granted")
                 }
-                return
-            }
-            // this does not work :(
-            GPS_PERMISSIONS_REQUEST_CODE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Permission is granted. Nothing happened
-                    Log.d(TAG, "yay, permission granted")
+                if ((grantResults.isNotEmpty() &&
+                            grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                ) {
+                    Log.d(TAG, "yay, gps permission granted")
+                    prepareGoogleFitClient()
+                    subscribe()
                 } else {
-                    // permission not granted. Sadness
-                    Log.d(TAG, "bruh")
+                    // should disable the step counter here
+                    Log.d(TAG, "gps permission is not granted")
                 }
                 return
-            }
-            else -> {
             }
         }
     }
@@ -407,24 +385,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getCurStepCount(){
-        Fitness.getHistoryClient(this, GoogleSignIn.getAccountForExtension(this, fitnessOptions))
-            .readDailyTotalFromLocalDevice(DataType.TYPE_STEP_COUNT_DELTA)
-            .addOnSuccessListener { result: DataSet ->
-                val curSteps =
-                    if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
-                        .asInt()
-//                Log.d(TAG, "current Step Count: $curSteps")
-                steps = curSteps.toLong()
-                step_counter.text = curSteps.toString()
-            }
-            .addOnFailureListener { e: java.lang.Exception ->
-                Log.i(
-                    TAG, "There was a problem getting steps: " +
-                            e.localizedMessage
-                )
-            }
+        if (stepCounterEnabled) {
+            Fitness.getHistoryClient(
+                this,
+                GoogleSignIn.getAccountForExtension(this, fitnessOptions)
+            )
+                .readDailyTotalFromLocalDevice(DataType.TYPE_STEP_COUNT_DELTA)
+                .addOnSuccessListener { result: DataSet ->
+                    val curSteps =
+                        if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
+                            .asInt()
+                    //                Log.d(TAG, "current Step Count: $curSteps")
+                    steps = curSteps.toLong()
+                    step_counter.text = curSteps.toString()
+                }
+                .addOnFailureListener { e: java.lang.Exception ->
+                    Log.i(
+                        TAG, "There was a problem getting steps: " +
+                                e.localizedMessage
+                    )
+                }
 
-
+        }else{
+            step_counter.visibility = View.GONE
+            step_tracker_icon.visibility = View.GONE
+        }
 
     }
 
