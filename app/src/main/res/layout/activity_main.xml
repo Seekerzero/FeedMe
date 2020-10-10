@@ -19,7 +19,8 @@
     <ImageView
         android:id="@+id/food_tracker_holder"
         android:layout_width="166dp"
-        android:layout_height="60dp"
+        android:layout_height="40dp"
+        android:paddingLeft="-30dp"
         android:src="@drawable/food_tracker_background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
@@ -35,50 +36,50 @@
 
     <ImageView
         android:id="@+id/food_tracker_icon2"
-        android:layout_width="35dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="7dp"
         android:src="@drawable/food_tracker_icon2"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon1"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
 
     <ImageView
         android:id="@+id/food_tracker_icon3"
-        android:layout_width="35dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="7dp"
         android:src="@drawable/food_tracker_icon3"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon2"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
 
     <ImageView
         android:id="@+id/food_tracker_icon1"
-        android:layout_width="35dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="7dp"
         android:src="@drawable/food_tracker_icon1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
 
     <ImageView
         android:id="@+id/step_tracker_icon"
-        android:layout_width="126dp"
-        android:layout_height="66dp"
+        android:layout_width="180dp"
+        android:layout_height="72dp"
         android:background="@drawable/footprint"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/step_tracker_number"
-        android:layout_width="76dp"
-        android:layout_height="37dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:paddingLeft="20dp"
+        android:layout_width="60dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="40dp"
+        android:paddingStart="20dp"
         android:textAlignment="viewStart"
-        android:textColor="@color/white"
-        android:textSize="30sp"
+        android:textColor="#BCC8CE"
+        android:textSize="40sp"
         app:layout_constraintEnd_toEndOf="@+id/step_tracker_icon"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -86,17 +87,18 @@
         android:id="@+id/awards_icon"
         android:layout_width="68dp"
         android:layout_height="68dp"
-        android:layout_marginBottom="44dp"
+        android:layout_marginStart="16dp"
         android:background="@drawable/awards"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/instructions_icon" />
+        app:layout_constraintBottom_toTopOf="@id/instructions_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="593dp" />
 
     <Button
         android:id="@+id/instructions_icon"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginBottom="48dp"
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/question_mark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -119,9 +121,9 @@
         android:layout_height="wrap_content"
         android:hint="Mochi Name"
         android:paddingRight="30dp"
-        android:textColor="@color/blue"
+        android:textColor="#6F8200"
         android:textSize="16sp"
-        android:backgroundTint="@color/blue"
+        android:backgroundTint="#6F8200"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Mochi Name" />
@@ -131,7 +133,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingRight="30dp"
-        android:textColor="@color/blue"
+        android:textColor="#6F8200"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mochi_name"

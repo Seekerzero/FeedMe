@@ -4,12 +4,15 @@ import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.AttributeSet
 import android.util.Log
 import android.view.DragEvent
 import android.view.View
@@ -17,7 +20,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -39,6 +44,7 @@ private const val TAG = "MainActivity"
 private const val MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION= 0
 private const val MY_PERMISSIONS_REQUEST_ACTIVITY_LOCATION= 1
 private const val GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 2
+private const val MY_TEST_PERMISSIONS_REQUEST_CODE = 3
 class MainActivity : AppCompatActivity() {
     private lateinit var mochi_name_label: EditText
     private lateinit var mochi_age_label: TextView
@@ -55,8 +61,9 @@ class MainActivity : AppCompatActivity() {
     private var steps: Long = 0
     var mealsEaten = 0
     var stepCounterEnabled: Boolean = true
-    val Permissions = mutableListOf<String>()
-    var permissionResult = IntArray(1)
+    var permissionRecognitionDone = false
+    var permissionLocationDone = false
+    var permissionRequestProcessDone = false
 
     private val dailyInfoListViewModel: DailyInfoListViewModel by lazy {
         ViewModelProviders.of(this).get(DailyInfoListViewModel::class.java)
@@ -70,15 +77,14 @@ class MainActivity : AppCompatActivity() {
         .build()
 
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Permissions.add(Manifest.permission.ACTIVITY_RECOGNITION)
-        Permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
 
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
 
         // Wire up widgets
         mochi_name_label = findViewById(R.id.mochi_name)
@@ -94,7 +100,6 @@ class MainActivity : AppCompatActivity() {
         awards_button = findViewById(R.id.awards_icon)
         instructions_button = findViewById(R.id.instructions_icon)
         step_counter = findViewById(R.id.step_tracker_number)
-        authorization()
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
@@ -150,7 +155,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+
+
     }
+
 
     // for dragging food to mochi
     private val dragListen = View.OnDragListener { v, event ->
@@ -200,13 +208,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
-        getCurStepCount()
-        refresh(1000)
+        if (!permissionRequestProcessDone) {
+            checkAuthorization()
+        }
 
+        getCurStepCount()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun refresh(timeSteps: Long){
         var handler: Handler = Handler()
         var runnable: Runnable = Runnable {
@@ -240,7 +252,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPermissionCode(name: String): Int {
-        var code = when (name) {
+        val code = when (name) {
             "android.permission.ACTIVITY_RECOGNITION" -> MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION
             "android.permission.ACCESS_COARSE_LOCATION" -> MY_PERMISSIONS_REQUEST_ACTIVITY_LOCATION
             else -> null
@@ -249,7 +261,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPermissionName(permission: String): String{
-        var name = when(permission){
+        val name = when(permission){
             "android.permission.ACTIVITY_RECOGNITION" -> "Accessing your Physics Activity"
             "android.permission.ACCESS_COARSE_LOCATION" -> "Accessing your Location"
             else -> null
@@ -257,60 +269,60 @@ class MainActivity : AppCompatActivity() {
         return  name?: "Unknown Activity "
     }
 
-    private fun authorization() {
-        for (permission in Permissions){
-            when {
-                ContextCompat.checkSelfPermission(this, permission)
-                        == PackageManager.PERMISSION_GRANTED -> {
-                    Log.d(TAG, "$permission is already granted")
-                    subscribe()
-                    if (ContextCompat.checkSelfPermission(this, Permissions[0])
-                        == PackageManager.PERMISSION_GRANTED){
-                        stepCounterEnabled = true
-                        prepareGoogleFitClient()
-                        subscribe()
-                    }
-                }
-                !shouldShowRequestPermissionRationale(permission)->{
-                    Log.d(TAG, "Requesting $permission")
-                    showExplanation(
-                        "We need your permission",
-                        "On ${getPermissionName(permission)}",
-                        permission,
-                        getPermissionCode(
-                            permission
-                        )
-                    )
-                }
-                else -> {
-                }
-            }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun checkAuthorization(){
+        permissionRecognitionDone = if (Build.VERSION.SDK_INT < 29){
+            prepareGoogleFitClient()
+            subscribe()
+            true
+        }else {
+            (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
+                    == PackageManager.PERMISSION_GRANTED)
         }
+        permissionLocationDone = (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED)
+        if(permissionRecognitionDone){
+            stepCounterEnabled = true
+        }else{
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), GOOGLE_FIT_PERMISSIONS_REQUEST_CODE)
+            prepareGoogleFitClient()
+            subscribe()
+        }
+        if (permissionLocationDone){
+
+        }else{
+
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), GOOGLE_FIT_PERMISSIONS_REQUEST_CODE)
+        }
+        permissionRequestProcessDone = permissionRecognitionDone && permissionLocationDone
     }
+
 
     private fun showExplanation(
         title: String,
         message: String,
         permission: String,
         permissionRequestCode: Int
-    ) {
+    ): Boolean {
+            var result = false
             val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(this)
             builder.setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(
                     android.R.string.ok
                 ) { dialog, id ->
-                    requestPermissions(
-                        arrayOf(permission), getPermissionCode(permission)
-                    )
+                    result = true
+                    requestPermissions(arrayOf(permission), getPermissionCode(permission))
                 }
         builder.create().show()
+        return result
     }
 
 
     private fun prepareGoogleFitClient() {
 
-        var account: GoogleSignInAccount = if (GoogleSignIn.getLastSignedInAccount(this) != null) {
+        val account: GoogleSignInAccount = if (GoogleSignIn.getLastSignedInAccount(this) != null) {
             GoogleSignIn.getLastSignedInAccount(this)!!
         } else {
             GoogleSignIn.getAccountForExtension(this, fitnessOptions)
@@ -329,7 +341,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    //TODO NOTE TO ZHANHONG I ALSO ADDED SOMETHING HERE
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -342,12 +354,12 @@ class MainActivity : AppCompatActivity() {
                             grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 ) {
                     Log.d(TAG, "yay, fit permission granted")
+                    permissionRequestProcessDone = true
                     stepCounterEnabled = true
-                    prepareGoogleFitClient()
-                    subscribe()
                 } else {
                     // should disable the step counter here
                     stepCounterEnabled = false
+//                    permissionRequestProcessDone = true
                     Log.d(TAG, "fit permission is not granted")
                 }
                 return
@@ -357,12 +369,15 @@ class MainActivity : AppCompatActivity() {
                             grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 ) {
                     Log.d(TAG, "yay, gps permission granted")
+                    permissionRequestProcessDone = true
                 } else {
                     // should disable the step counter here
+//                    permissionRequestProcessDone = true
                     Log.d(TAG, "gps permission is not granted")
                 }
                 return
             }
+            else->{}
         }
     }
 
@@ -378,7 +393,7 @@ class MainActivity : AppCompatActivity() {
             .bucketByTime(1, TimeUnit.DAYS)
             .build()
 
-        var account: GoogleSignInAccount = if(GoogleSignIn.getLastSignedInAccount(this) != null){
+        val account: GoogleSignInAccount = if(GoogleSignIn.getLastSignedInAccount(this) != null){
             GoogleSignIn.getLastSignedInAccount(this)!!
         }else{
             GoogleSignIn.getAccountForExtension(this, fitnessOptions)
@@ -420,7 +435,7 @@ class MainActivity : AppCompatActivity() {
                             )
                         )
                             .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
-                            .addOnSuccessListener { unused: Void? ->
+                            .addOnSuccessListener {
                                 Log.i(
                                     TAG,
                                     "Subscription for TYPE_STEP_COUNT_CUMULATIVE was successful!"
@@ -437,6 +452,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun getCurStepCount(){
         if (stepCounterEnabled) {
             Fitness.getHistoryClient(
@@ -463,7 +479,9 @@ class MainActivity : AppCompatActivity() {
             step_counter.visibility = View.GONE
             step_tracker_icon.visibility = View.GONE
         }
-
+        if(permissionRequestProcessDone) {
+            refresh(2000)
+        }
     }
 
 
