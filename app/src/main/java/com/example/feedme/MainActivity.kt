@@ -464,7 +464,7 @@ class MainActivity : AppCompatActivity() {
                     val curSteps =
                         if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
                             .asInt()
-                                    Log.d(TAG, "current Step Count: $curSteps")
+//                                    Log.d(TAG, "current Step Count: $curSteps")
                     steps = curSteps.toLong()
                     step_counter.text = curSteps.toString()
                 }
