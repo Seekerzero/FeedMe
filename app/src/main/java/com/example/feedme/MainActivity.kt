@@ -36,6 +36,7 @@ import com.google.android.gms.fitness.request.DataReadRequest
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity() {
     var permissionRecognitionDone = false
     var permissionLocationDone = false
     var permissionRequestProcessDone = false
+    private val jsonHandler = JsonHandler()
 
     private val dailyInfoListViewModel: DailyInfoListViewModel by lazy {
         ViewModelProviders.of(this).get(DailyInfoListViewModel::class.java)
@@ -81,7 +83,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        if(File(this.filesDir, "MochiInfo.json") != null){
+            jsonHandler.createMochiInfoFile(this)
+        }
+        jsonHandler.readMochiInfoFile(this)
 
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -229,7 +234,6 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed(runnable, timeSteps)
     }
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
@@ -269,7 +273,6 @@ class MainActivity : AppCompatActivity() {
         return  name?: "Unknown Activity "
     }
 
-
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun checkAuthorization(){
         permissionRecognitionDone = if (Build.VERSION.SDK_INT < 29){
@@ -298,7 +301,6 @@ class MainActivity : AppCompatActivity() {
         permissionRequestProcessDone = permissionRecognitionDone && permissionLocationDone
     }
 
-
     private fun showExplanation(
         title: String,
         message: String,
@@ -318,7 +320,6 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
         return result
     }
-
 
     private fun prepareGoogleFitClient() {
 
@@ -340,7 +341,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
