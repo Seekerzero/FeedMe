@@ -47,3 +47,19 @@ F 10/16
 ---------------------
 - Tests
 - Video 
+
+
+TODO: 10/11
+---------------------
+- Awards dates into JSON: ZH 
+- Check if gotten award logic in Dao
+- Change mochi name in JSON (ZH) 
+- Unit tests for critical functions
+	- areWeInJapan(): SL
+	- createDate(): SL
+	- dao tests: SL
+	- JSON handler: ZH
+	
+- Performance tests (Thursday?) 
+
+
