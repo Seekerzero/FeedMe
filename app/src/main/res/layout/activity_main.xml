@@ -20,7 +20,8 @@
         android:id="@+id/food_dish"
         android:layout_width="119dp"
         android:layout_height="112dp"
-        android:src="@drawable/food_dish_jp"
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/food_dish_us"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -28,8 +29,8 @@
         android:id="@+id/food_tracker_holder"
         android:layout_width="166dp"
         android:layout_height="40dp"
-        android:paddingLeft="-30dp"
-        android:src="@drawable/food_tracker_background"
+        android:paddingLeft="-50dp"
+        android:src="@drawable/food_tracker_background_us"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/step_tracker_icon" />
 
@@ -40,7 +41,7 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginTop="7dp"
-        android:src="@drawable/food_tracker_icon2_jp"
+        android:src="@drawable/food_tracker_icon2_us"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon1"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
 
@@ -49,7 +50,7 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_marginTop="7dp"
-        android:src="@drawable/food_tracker_icon3_jp"
+        android:src="@drawable/food_tracker_icon3_us"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon2"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
 
@@ -59,7 +60,7 @@
         android:layout_height="25dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="7dp"
-        android:src="@drawable/food_tracker_icon1_jp"
+        android:src="@drawable/food_tracker_icon1_us"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
 
