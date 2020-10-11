@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        dailyInfoListViewModel.addDailyInfo(DailyInfo(createDateForToday(), 0, 0)) // TODO REMOVE
+//        dailyInfoListViewModel.addDailyInfo(DailyInfo(createDateForToday(), 0, 0)) // TODO REMOVE
         dailyInfoListViewModel.getEntry("20201011").observe(
             this,
             androidx.lifecycle.Observer { entry: DailyInfo? ->
@@ -257,12 +257,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
         if (!permissionRequestProcessDone) {
             checkAuthorization()
         } else {
+            // For getting location
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (permissionRequestProcessDone) {
+                    areWeInJapan(location)
+                }
+                Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
+            }
             getCurStepCount()
         }
     }

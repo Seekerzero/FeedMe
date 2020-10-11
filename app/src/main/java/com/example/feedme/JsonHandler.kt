@@ -11,7 +11,8 @@ private const val TAG = "JSON_HANDLER"
 
 class JsonHandler(){
 
-    val mochiInfo = MochiInfo("test", SimpleDateFormat("MM/dd/yyyy").format(Calendar.getInstance().time))
+    val mochiInfo = MochiInfo("test", SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().time))
+
 
 
     fun createMochiInfoFile(context: Context){
@@ -38,6 +39,8 @@ class JsonHandler(){
         mochiInfo.name = jsonObject.get("Name").toString()
         mochiInfo.birthday = jsonObject.get("Birthday").toString()
     }
+
+
 
 
 
