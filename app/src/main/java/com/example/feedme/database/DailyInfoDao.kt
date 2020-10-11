@@ -22,5 +22,4 @@ interface DailyInfoDao {
     @Insert
     fun addDailyInfo(dailyInfo: DailyInfo)
 
-    // Add queries for awards
 }

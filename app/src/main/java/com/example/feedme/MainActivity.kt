@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity() {
     var permissionLocationDone = false
     var permissionRequestProcessDone = false
     private val jsonHandler = JsonHandler()
-    private var checkedInJapan = false
 
     private val dailyInfoListViewModel: DailyInfoListViewModel by lazy {
         ViewModelProviders.of(this).get(DailyInfoListViewModel::class.java)
@@ -127,6 +126,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 mochi_name = s.toString()
                 mochi_name_label.setTextColor(getResources().getColor(R.color.white))
+                jsonHandler.mochiInfo.name = s.toString()
             }
         })
 
@@ -171,6 +171,27 @@ class MainActivity : AppCompatActivity() {
             }
             Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
         }
+
+        dailyInfoListViewModel.dailyInfoLiveData.observe(
+            this,
+            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
+                Log.d(TAG, "There are ${entries.size} entries")
+                Log.d(
+                    TAG,
+                    "An entry looks like this: Date: ${entries[0].date}, Steps: ${entries[0].steps}, Times Eaten: ${entries[0].times_eaten}"
+                )
+                mochi_age_label.text = "Mochi Age: ${entries.size} days"
+            }
+        )
+        dailyInfoListViewModel.getEntry(Date(100)).observe(
+            this,
+            androidx.lifecycle.Observer { entry: DailyInfo? ->
+                Log.d(TAG, "Daily Info entry for date (100): ${entry?.times_eaten}")
+                Log.d(TAG, "Daily Info entry for date (100): ${entry?.steps}")
+            }
+        )
+
+
     }
 
 
@@ -219,7 +240,6 @@ class MainActivity : AppCompatActivity() {
                 false
             }
         }
-
     }
 
     @SuppressLint("MissingPermission")
@@ -248,6 +268,7 @@ class MainActivity : AppCompatActivity() {
             food_tracker_icon_2.setImageResource(R.drawable.food_tracker_icon2_jp)
             food_tracker_icon_3.setImageResource(R.drawable.food_tracker_icon3_jp)
             Log.d(TAG, "We in japan!!")
+            // TODO add Japan award to JSON
         }
     }
 

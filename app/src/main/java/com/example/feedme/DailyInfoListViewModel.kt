@@ -1,7 +1,9 @@
 package com.example.feedme
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import java.util.*
 
 private const val TAG = "DailyInfoListViewModel"
 
@@ -15,26 +17,34 @@ class DailyInfoListViewModel : ViewModel() {
 //        for (i in 0 until 10) {
 //            addDailyInfo(
 //                DailyInfo(
-//                    Date((Random.nextInt()).toLong()),
+//                    Date(100),//Date((nextInt()).toLong()),
 //                    Random.nextLong(0, 100),
-//                    Random.nextInt(0, 100)
+//                    nextInt(0, 100)
 //                )
 //            )
 //        }
     }
 
     /**
-     * Add a new game to the database
+     * Add a new entry to the database
      */
     fun addDailyInfo(dailyInfo: DailyInfo) {
         dailyInfoRepository.addDailyInfo(dailyInfo)
     }
 
     /**
-     * Update an existing game in the database
+     * Update an existing entry in the database
      */
     fun updateDailyInfo(dailyInfo: DailyInfo) {
         dailyInfoRepository.updateDailyInfo(dailyInfo)
+    }
+
+    fun getEntries(): LiveData<List<DailyInfo>> {
+        return dailyInfoRepository.getEntries()
+    }
+
+    fun getEntry(id: Date): LiveData<DailyInfo?> {
+        return dailyInfoRepository.getEntry(id)
     }
 
 }

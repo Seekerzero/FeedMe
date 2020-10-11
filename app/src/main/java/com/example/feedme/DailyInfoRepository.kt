@@ -36,10 +36,6 @@ class DailyInfoRepository private constructor(context: Context) {
         }
     }
 
-//    fun getPhotoFile_A(dailyInfo: DailyInfo): File = File(filesDir, dailyInfo.photoFileName_teamA)
-//    fun getPhotoFile_B(dailyInfo: DailyInfo: File = File(filesDir, dailyInfo.photoFileName_teamB)
-
-
     companion object {
         private var INSTANCE: DailyInfoRepository? = null
 
