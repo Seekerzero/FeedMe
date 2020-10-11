@@ -3,7 +3,8 @@ package com.example.feedme
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import java.util.*
+import kotlin.random.Random
+import kotlin.random.Random.Default.nextInt
 
 private const val TAG = "DailyInfoListViewModel"
 
@@ -13,16 +14,16 @@ class DailyInfoListViewModel : ViewModel() {
 
     // initialize with dummy data
     fun initializeWithDummyData() {
-        Log.d(TAG, "Loading dummy data. This part is commented out for now.")
-//        for (i in 0 until 10) {
-//            addDailyInfo(
-//                DailyInfo(
-//                    Date(100),//Date((nextInt()).toLong()),
-//                    Random.nextLong(0, 100),
-//                    nextInt(0, 100)
-//                )
-//            )
-//        }
+        Log.d(TAG, "Loading dummy data.")
+        for (i in 0 until 10) {
+            addDailyInfo(
+                DailyInfo(
+                    nextInt().toString(),
+                    Random.nextLong(0, 100),
+                    nextInt(0, 100)
+                )
+            )
+        }
     }
 
     /**
@@ -43,7 +44,7 @@ class DailyInfoListViewModel : ViewModel() {
         return dailyInfoRepository.getEntries()
     }
 
-    fun getEntry(id: Date): LiveData<DailyInfo?> {
+    fun getEntry(id: String): LiveData<DailyInfo?> {
         return dailyInfoRepository.getEntry(id)
     }
 

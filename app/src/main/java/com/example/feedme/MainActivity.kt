@@ -183,20 +183,29 @@ class MainActivity : AppCompatActivity() {
                 mochi_age_label.text = "Mochi Age: ${entries.size} days"
             }
         )
-        dailyInfoListViewModel.getEntry(Date(100)).observe(
+
+        dailyInfoListViewModel.addDailyInfo(DailyInfo(createDateForToday(), 0, 0))
+        dailyInfoListViewModel.getEntry("20201011").observe(
             this,
             androidx.lifecycle.Observer { entry: DailyInfo? ->
-                Log.d(TAG, "Daily Info entry for date (100): ${entry?.times_eaten}")
-                Log.d(TAG, "Daily Info entry for date (100): ${entry?.steps}")
+                Log.d(TAG, "Daily Info entry for date (20201011): ${entry?.times_eaten}")
+                Log.d(TAG, "Daily Info entry for date (20201011): ${entry?.steps}")
             }
         )
 
+    }
 
+    private fun createDateForToday(): String {
+        val cal: Calendar = Calendar.getInstance()
+        cal.time = Date()
+        return cal.get(Calendar.YEAR)
+            .toString() + (cal.get(Calendar.MONTH) + 1).toString() + cal.get(Calendar.DATE)
+            .toString()
     }
 
 
     // for dragging food to mochi
-    private val dragListen = View.OnDragListener { v, event ->
+    private val dragListen = View.OnDragListener { _, event ->
         when (event.action) {
             DragEvent.ACTION_DRAG_STARTED -> {
                 true
@@ -242,7 +251,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
@@ -254,10 +262,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun areWeInJapan(location: Location?) {
-        Log.d(
-            TAG,
-            "Latitude difference: ${(location?.latitude?.toFloat() ?: 0).toFloat() - 36.2048}"
-        )
         if ((kotlin.math.abs((location?.latitude?.toFloat() ?: 0).toFloat() - 36.2048)
                 .toFloat() < 2)
             && (kotlin.math.abs((location?.longitude?.toFloat() ?: 0).toFloat() - 138.2529) < 2)
@@ -297,7 +301,13 @@ class MainActivity : AppCompatActivity() {
         // update with daily info
         Log.d(TAG, "Updating daily info database")
         try {
-//            dailyInfoListViewModel.addDailyInfo(DailyInfo(Date(), steps, mealsEaten))
+            dailyInfoListViewModel.updateDailyInfo(
+                DailyInfo(
+                    createDateForToday(),
+                    steps,
+                    mealsEaten
+                )
+            )
         } catch (e: Exception) {
             Log.e(TAG, e.localizedMessage)
         }

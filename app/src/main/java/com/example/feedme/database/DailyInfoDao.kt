@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.example.feedme.DailyInfo
-import java.util.*
 
 @Dao
 interface DailyInfoDao {
@@ -14,7 +13,7 @@ interface DailyInfoDao {
     fun getEntries(): LiveData<List<DailyInfo>>
 
     @Query("SELECT * FROM dailyInfo WHERE date=(:id)")
-    fun getEntry(id: Date): LiveData<DailyInfo?>
+    fun getEntry(id: String): LiveData<DailyInfo?>
 
     @Update
     fun updateDailyInfo(dailyInfo: DailyInfo)

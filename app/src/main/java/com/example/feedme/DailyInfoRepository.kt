@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.example.feedme.database.DailyInfoDatabase
-import java.util.*
 import java.util.concurrent.Executors
 
 
@@ -22,7 +21,7 @@ class DailyInfoRepository private constructor(context: Context) {
     private val executor = Executors.newSingleThreadExecutor()
 
     fun getEntries(): LiveData<List<DailyInfo>> = dailyInfoDao.getEntries()
-    fun getEntry(id: Date): LiveData<DailyInfo?> = dailyInfoDao.getEntry(id)
+    fun getEntry(id: String): LiveData<DailyInfo?> = dailyInfoDao.getEntry(id)
 
     fun updateDailyInfo(dailyInfo: DailyInfo) {
         executor.execute {
