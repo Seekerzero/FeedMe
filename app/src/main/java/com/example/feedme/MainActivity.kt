@@ -125,8 +125,9 @@ class MainActivity : AppCompatActivity() {
                 before: Int, count: Int
             ) {
                 mochi_name = s.toString()
-                mochi_name_label.setTextColor(getResources().getColor(R.color.white))
+                mochi_name_label.setTextColor(getResources().getColor(R.color.green))
                 jsonHandler.mochiInfo.name = s.toString()
+                jsonHandler.createMochiInfoFile(this@MainActivity)
             }
         })
 
