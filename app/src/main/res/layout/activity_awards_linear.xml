@@ -27,18 +27,21 @@
             android:id="@+id/walk_5000_1"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/walk_5000_1_day" />
 
         <ImageView
             android:id="@+id/walk_2000_7"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/walk_2000_7days" />
 
         <ImageView
             android:id="@+id/walk_2000_1"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/walk_2000_1day" />
     </LinearLayout>
 
@@ -51,18 +54,21 @@
             android:id="@+id/health_1"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/health_1" />
 
         <ImageView
             android:id="@+id/health_7"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/health_7" />
 
         <ImageView
             android:id="@+id/health_30"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/health_30" />
     </LinearLayout>
 
@@ -75,6 +81,7 @@
             android:id="@+id/happy_medal"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/happy_mochi_medal"
 
             app:layout_constraintStart_toEndOf="@+id/japan_medal"
@@ -85,12 +92,14 @@
             android:id="@+id/japan_medal"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/japan_medal" />
 
         <ImageView
             android:id="@+id/age_100_days"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:background="#80FFFFFF"
             android:src="@drawable/age_100_days" />
 
 
