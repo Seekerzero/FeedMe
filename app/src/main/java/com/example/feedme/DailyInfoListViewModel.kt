@@ -2,8 +2,6 @@ package com.example.feedme
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import java.util.*
-import kotlin.random.Random
 
 private const val TAG = "DailyInfoListViewModel"
 
@@ -13,16 +11,16 @@ class DailyInfoListViewModel : ViewModel() {
 
     // initialize with dummy data
     fun initializeWithDummyData() {
-        Log.d(TAG, "Loading dummy data")
-        for (i in 0 until 10) {
-            addDailyInfo(
-                DailyInfo(
-                    Date((Random.nextInt()).toLong()),
-                    Random.nextLong(0, 100),
-                    Random.nextInt(0, 100)
-                )
-            )
-        }
+        Log.d(TAG, "Loading dummy data. This part is commented out for now.")
+//        for (i in 0 until 10) {
+//            addDailyInfo(
+//                DailyInfo(
+//                    Date((Random.nextInt()).toLong()),
+//                    Random.nextLong(0, 100),
+//                    Random.nextInt(0, 100)
+//                )
+//            )
+//        }
     }
 
     /**

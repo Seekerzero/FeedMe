@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    tools:context=".AwardsActivity"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/achievements_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Achievements!"
+        android:textColor="@color/white"
+        android:textSize="50sp"
+        android:paddingBottom="50sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/walk_5000_1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/walk_5000_1_day" />
+
+        <ImageView
+            android:id="@+id/walk_2000_7"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/walk_2000_7days" />
+
+        <ImageView
+            android:id="@+id/walk_2000_1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/walk_2000_1day" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/health_1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/health_1" />
+
+        <ImageView
+            android:id="@+id/health_7"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/health_7" />
+
+        <ImageView
+            android:id="@+id/health_30"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/health_30" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/happy_medal"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/happy_mochi_medal"
+            android:background="@color/black"
+
+            app:layout_constraintStart_toEndOf="@+id/japan_medal"
+            app:layout_constraintTop_toBottomOf="@+id/health_7" />
+
+
+        <ImageView
+            android:id="@+id/japan_medal"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/japan_medal" />
+
+        <ImageView
+            android:id="@+id/age_100_days"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:background="@color/black"
+            android:src="@drawable/age_100_days" />
+
+
+    </LinearLayout>
+
+
+    <FrameLayout
+        android:id="@+id/awards_description_fragment_container"
+        android:layout_width="403dp"
+        android:layout_height="125dp">
+
+
+    </FrameLayout>
+</LinearLayout>

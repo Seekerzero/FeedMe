@@ -24,8 +24,9 @@ class AwardsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_awards)
+        setContentView(R.layout.activity_awards_linear)
 
+        Log.d(TAG, "Starting to setup awards in onCreate()")
         achievement_title_label = findViewById(R.id.achievements_title)
         health_1_award = findViewById(R.id.health_1)
         health_7_award = findViewById(R.id.health_7)
@@ -38,7 +39,11 @@ class AwardsActivity : AppCompatActivity() {
         mochi_health_award = findViewById(R.id.happy_medal)
         age_100_award = findViewById(R.id.age_100_days)
         japan_award = findViewById(R.id.japan_medal)
+    }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "Setting listeners in onStart()")
         //award on click for each button
         health_1_award.setOnClickListener {
             changeDetailFragment(Awards.HEALTH_1.awardName)
@@ -69,7 +74,6 @@ class AwardsActivity : AppCompatActivity() {
         japan_award.setOnClickListener {
             changeDetailFragment(Awards.TRAVELLER.awardName)
         }
-
     }
 
     fun changeDetailFragment(award_name: String) {
