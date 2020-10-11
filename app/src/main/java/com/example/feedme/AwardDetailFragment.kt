@@ -52,7 +52,7 @@ class AwardDetailFragment : Fragment() {
             current_award?.award_description_string_resource ?: R.string.award_description_null
         )
         award_date_label.text = (current_award?.award_date?.toString()
-            ?: "Date earned") // TODO when user gets award, set date!
+            ?: "Award not earned yet") // TODO when user gets award, set date!
 
     }
 

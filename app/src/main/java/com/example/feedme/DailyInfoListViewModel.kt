@@ -40,10 +40,6 @@ class DailyInfoListViewModel : ViewModel() {
         dailyInfoRepository.updateDailyInfo(dailyInfo)
     }
 
-    fun getEntries(): LiveData<List<DailyInfo>> {
-        return dailyInfoRepository.getEntries()
-    }
-
     fun getEntry(id: String): LiveData<DailyInfo?> {
         return dailyInfoRepository.getEntry(id)
     }

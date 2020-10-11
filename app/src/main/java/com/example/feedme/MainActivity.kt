@@ -165,6 +165,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // For getting location
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             if (permissionRequestProcessDone) {
                 areWeInJapan(location)
@@ -172,6 +173,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
         }
 
+        // TODO FOR DEBUGGING
         dailyInfoListViewModel.dailyInfoLiveData.observe(
             this,
             androidx.lifecycle.Observer { entries: List<DailyInfo> ->
@@ -184,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-        dailyInfoListViewModel.addDailyInfo(DailyInfo(createDateForToday(), 0, 0))
+        dailyInfoListViewModel.addDailyInfo(DailyInfo(createDateForToday(), 0, 0)) // TODO REMOVE
         dailyInfoListViewModel.getEntry("20201011").observe(
             this,
             androidx.lifecycle.Observer { entry: DailyInfo? ->
@@ -195,6 +197,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    /**
+     * For creating the unique key for today's date to use as primary key in dao
+     * Example: "20201011" for Oct 11, 2020
+     */
     private fun createDateForToday(): String {
         val cal: Calendar = Calendar.getInstance()
         cal.time = Date()
@@ -261,12 +267,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Checks to see if you are within 100 miles of Tokyo
+     */
     private fun areWeInJapan(location: Location?) {
         if ((kotlin.math.abs((location?.latitude?.toFloat() ?: 0).toFloat() - 36.2048)
                 .toFloat() < 2)
             && (kotlin.math.abs((location?.longitude?.toFloat() ?: 0).toFloat() - 138.2529) < 2)
         ) {
-//           we are within 100ish miles of Tokyo!
+            //  we are within 100ish miles of Tokyo!
+            // change background and theme
             layout.setBackgroundResource(R.drawable.background)
             food_tracker_icon_1.setImageResource(R.drawable.food_tracker_icon1_jp)
             food_tracker_icon_2.setImageResource(R.drawable.food_tracker_icon2_jp)
@@ -301,6 +311,7 @@ class MainActivity : AppCompatActivity() {
         // update with daily info
         Log.d(TAG, "Updating daily info database")
         try {
+            // add or update today's entry with ending steps and meals eaten
             dailyInfoListViewModel.updateDailyInfo(
                 DailyInfo(
                     createDateForToday(),
