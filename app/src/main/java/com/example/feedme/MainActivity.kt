@@ -21,6 +21,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -169,12 +170,13 @@ class MainActivity : AppCompatActivity() {
         // For getting location
         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
             if (permissionRequestProcessDone) {
-                areWeInJapan(location)
+                if (areWeInJapan(location)) {
+                    changeUItoJapan()
+                }
             }
             Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
         }
 
-        // TODO FOR DEBUGGING
         dailyInfoListViewModel.dailyInfoLiveData.observe(
             this,
             androidx.lifecycle.Observer { entries: List<DailyInfo> ->
@@ -187,12 +189,19 @@ class MainActivity : AppCompatActivity() {
             }
         )
 
-//        dailyInfoListViewModel.addDailyInfo(DailyInfo(createDateForToday(), 0, 0)) // TODO REMOVE
-        dailyInfoListViewModel.getEntry("20201011").observe(
+        dailyInfoListViewModel.getEntry(createDateForToday()).observe(
             this,
             androidx.lifecycle.Observer { entry: DailyInfo? ->
-                Log.d(TAG, "Daily Info entry for date (20201011): ${entry?.times_eaten}")
-                Log.d(TAG, "Daily Info entry for date (20201011): ${entry?.steps}")
+                // if entry for today does not exist
+                if (entry == null) {
+                    dailyInfoListViewModel.addDailyInfo(
+                        DailyInfo(
+                            createDateForToday(),
+                            steps,
+                            mealsEaten
+                        )
+                    )
+                }
             }
         )
 
@@ -202,14 +211,14 @@ class MainActivity : AppCompatActivity() {
      * For creating the unique key for today's date to use as primary key in dao
      * Example: "20201011" for Oct 11, 2020
      */
-    private fun createDateForToday(): String {
+    @VisibleForTesting
+    fun createDateForToday(): String {
         val cal: Calendar = Calendar.getInstance()
         cal.time = Date()
         return cal.get(Calendar.YEAR)
             .toString() + (cal.get(Calendar.MONTH) + 1).toString() + cal.get(Calendar.DATE)
             .toString()
     }
-
 
     // for dragging food to mochi
     private val dragListen = View.OnDragListener { _, event ->
@@ -246,6 +255,7 @@ class MainActivity : AppCompatActivity() {
                 } else if (mealsEaten >= 3) {
                     food_tracker_icon_3.clearColorFilter()
                     mochi_icon.setImageResource(R.drawable.green_mochi_super_happy)
+                    checkHappyChomperAward()
                 }
                 true
             }
@@ -258,6 +268,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Checks to see if they have happy chomper award (ate 3x in one day). If not, give it to them
+     */
+    private fun checkHappyChomperAward() {
+        // todo check if they have happy chomper award. Give if no
+
+    }
+
+    /**
+     * Checks mochi's age on start up to see if get 100 day award
+     */
+    private fun checkAgeAward() {
+        // todo check age based on birthday in json
+        // todo give them award if >=100
+    }
+
     @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
@@ -268,7 +294,9 @@ class MainActivity : AppCompatActivity() {
             // For getting location
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 if (permissionRequestProcessDone) {
-                    areWeInJapan(location)
+                    if (areWeInJapan(location)) {
+                        changeUItoJapan()
+                    }
                 }
                 Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
             }
@@ -279,20 +307,183 @@ class MainActivity : AppCompatActivity() {
     /**
      * Checks to see if you are within 100 miles of Tokyo
      */
-    private fun areWeInJapan(location: Location?) {
+    @VisibleForTesting
+    fun areWeInJapan(location: Location?): Boolean {
         if ((kotlin.math.abs((location?.latitude?.toFloat() ?: 0).toFloat() - 36.2048)
                 .toFloat() < 2)
             && (kotlin.math.abs((location?.longitude?.toFloat() ?: 0).toFloat() - 138.2529) < 2)
         ) {
             //  we are within 100ish miles of Tokyo!
-            // change background and theme
-            layout.setBackgroundResource(R.drawable.background)
-            food_tracker_icon_1.setImageResource(R.drawable.food_tracker_icon1_jp)
-            food_tracker_icon_2.setImageResource(R.drawable.food_tracker_icon2_jp)
-            food_tracker_icon_3.setImageResource(R.drawable.food_tracker_icon3_jp)
             Log.d(TAG, "We in japan!!")
-            // TODO add Japan award to JSON
+            // TODO add Japan award
+            return true
         }
+        return false
+    }
+
+    private fun changeUItoJapan() {
+        // change background and theme
+        layout.setBackgroundResource(R.drawable.background)
+        food_tracker_icon_1.setImageResource(R.drawable.food_tracker_icon1_jp)
+        food_tracker_icon_2.setImageResource(R.drawable.food_tracker_icon2_jp)
+        food_tracker_icon_3.setImageResource(R.drawable.food_tracker_icon3_jp)
+    }
+
+    /**
+     * Award setting function for walking 2000 steps for the last 7 days
+     */
+    private fun got2000_7award() {
+        if (walk2000_7days()) {
+            // they get award
+        }
+        // set award todo
+    }
+
+    /**
+     * Helper function
+     * Calculate whether you have gotten 2000 steps in past 7 days
+     */
+    private fun walk2000_7days(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(7)
+        var dateDoesNotExistOrQualify = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if ((entry == null) || (entry.steps < 2000)) {
+                        dateDoesNotExistOrQualify = true
+                    }
+                }
+            )
+            if (dateDoesNotExistOrQualify) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * Award setting function for eating 3 meals a day for the last 7 days
+     */
+    private fun ate_3_meals_7_days() {
+        if (ate_3_meals_7_days_check()) {
+            // they get award
+        }
+        // set award todo
+    }
+
+    /**
+     * Helper function
+     * Calculate whether you have gotten 2000 steps in past 7 days
+     */
+    private fun ate_3_meals_7_days_check(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(7)
+        var dateDoesNotExistOrQualify = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if ((entry == null) || (entry.times_eaten < 3)) {
+                        dateDoesNotExistOrQualify = true
+                    }
+                }
+            )
+            if (dateDoesNotExistOrQualify) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * Check to see if ate 3 times a day and walked 2000 steps for last 7 consecutive days
+     */
+    private fun setAwards_3meals_2000steps() {
+        // todo if don't have award
+        // and if (helper_3meals_2000steps()){} // then give award!
+    }
+
+    private fun helper_3meals_2000steps(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(7)
+        var dateDoesNotExist = false
+        var walkedAndAte = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if (entry == null) {
+                        dateDoesNotExist = true
+                    } else { // not null
+                        if ((entry.times_eaten >= 3) && (entry.steps >= 2000)) {
+                            walkedAndAte = true
+                        }
+                    }
+                }
+            )
+            // if entry for date doesn't exist, or didn't eat 3 times, or didn't walk 2000 steps today
+            if (dateDoesNotExist || !walkedAndAte) {
+                return false
+            }
+            // reset 3x eating and 2000 steps flag for next loop
+            walkedAndAte = false
+        }
+        return true
+    }
+
+    /**
+     * Check to see if ate 3 times a day for last 30 consecutive days
+     */
+    private fun setAwards_3meals_30days() {
+        // todo if don't have award
+        // and if (helper_3meals_30days()){} // then give award!
+    }
+
+    private fun helper_3meals_30days(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(30)
+        var dateDoesNotExist = false
+        var ate = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if (entry == null) {
+                        dateDoesNotExist = true
+                    } else { // not null
+                        if (entry.times_eaten >= 3) {
+                            ate = true
+                        }
+                    }
+                }
+            )
+            // if entry for date doesn't exist, or didn't eat 3 times, or didn't walk 2000 steps today
+            if (dateDoesNotExist || !ate) {
+                return false
+            }
+            // reset 3x eating flag for next loop
+            ate = false
+        }
+        return true
+    }
+
+    /**
+     * Helper function to create dates for past 7 days
+     */
+    private fun pastDaysDates(numDays: Int): MutableList<String> {
+        var dates: MutableList<String> = mutableListOf()
+        var today: String = createDateForToday()
+        dates.add(today)
+        for (i in 1 until (numDays + 1)) {
+            dates.add((today.toInt() - i).toString())
+        }
+        return dates
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -320,16 +511,27 @@ class MainActivity : AppCompatActivity() {
         // update with daily info
         Log.d(TAG, "Updating daily info database")
         try {
-            // add or update today's entry with ending steps and meals eaten
-            dailyInfoListViewModel.updateDailyInfo(
-                DailyInfo(
-                    createDateForToday(),
-                    steps,
-                    mealsEaten
-                )
-            )
+            updateDailyInfoAndAwards()
         } catch (e: Exception) {
             Log.e(TAG, e.localizedMessage)
+        }
+    }
+
+    private fun updateDailyInfoAndAwards() {
+        // add or update today's entry with ending steps and meals eaten
+        dailyInfoListViewModel.updateDailyInfo(
+            DailyInfo(
+                createDateForToday(),
+                steps,
+                mealsEaten
+            )
+        )
+        // check step count for today
+        if (steps >= 2000) {
+            // todo give award
+        }
+        if (steps >= 5000) {
+            // todo give award
         }
     }
 
@@ -458,7 +660,9 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "yay, gps permission granted")
                     permissionRequestProcessDone = true
                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                        areWeInJapan(location)
+                        if (areWeInJapan(location)) {
+                            changeUItoJapan()
+                        }
                     }
 
                 } else {
