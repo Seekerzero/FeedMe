@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (File(this.filesDir, "MochiInfo.json") != null) {
+        if (!File(this.filesDir, "MochiInfo.json").exists()) {
             jsonHandler.createMochiInfoFile(this)
         }
         jsonHandler.readMochiInfoFile(this)
@@ -113,7 +113,10 @@ class MainActivity : AppCompatActivity() {
 
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {}
+            override fun afterTextChanged(s: Editable) {
+                jsonHandler.mochiInfo.name = s.toString()
+                jsonHandler.createMochiInfoFile(this@MainActivity)
+            }
 
             override fun beforeTextChanged(
                 s: CharSequence, start: Int,
@@ -127,8 +130,6 @@ class MainActivity : AppCompatActivity() {
             ) {
                 mochi_name = s.toString()
                 mochi_name_label.setTextColor(getResources().getColor(R.color.green))
-                jsonHandler.mochiInfo.name = s.toString()
-                jsonHandler.createMochiInfoFile(this@MainActivity)
             }
         })
 
@@ -167,44 +168,83 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // For getting location
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (permissionRequestProcessDone) {
+        // TODO: to Sabrina, I just found there are bugs here after first install, so I disable these function in temporally
+        // todo there is a bug here which will cause the app close after first install. something should be initialized before this.
+        // Process: com.example.feedme, PID: 31229
+        //    java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+        //        at java.util.ArrayList.get(ArrayList.java:437)
+        //        at com.example.feedme.MainActivity$onCreate$5.onChanged(MainActivity.kt:186)
+        //        at com.example.feedme.MainActivity$onCreate$5.onChanged(MainActivity.kt:52)
+        //        at androidx.lifecycle.LiveData.considerNotify(LiveData.java:133)
+        //        at androidx.lifecycle.LiveData.dispatchingValue(LiveData.java:151)
+        //        at androidx.lifecycle.LiveData.setValue(LiveData.java:309)
+        //        at androidx.lifecycle.LiveData$1.run(LiveData.java:93)
+        //        at android.os.Handler.handleCallback(Handler.java:938)
+        //        at android.os.Handler.dispatchMessage(Handler.java:99)
+        //        at android.os.Looper.loop(Looper.java:223)
+
+//        dailyInfoListViewModel.dailyInfoLiveData.observe(
+//            this,
+//            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
+//                Log.d(TAG, "There are ${entries.size} entries")
+//
+//                Log.d(
+//                    TAG,
+//                    "An entry looks like this: Date: ${entries[0].date}, Steps: ${entries[0].steps}, Times Eaten: ${entries[0].times_eaten}"
+//                )
+//                mochi_age_label.text = "Mochi Age: ${entries.size} days"
+//            }
+//        )
+
+        //todo also bug here I believe it should be the same type of problem
+//        Process: com.example.feedme, PID: 7957
+//        android.database.sqlite.SQLiteConstraintException: UNIQUE constraint failed: DailyInfo.date (code 1555 SQLITE_CONSTRAINT_PRIMARYKEY)
+//        at android.database.sqlite.SQLiteConnection.nativeExecuteForLastInsertedRowId(Native Method)
+//        at android.database.sqlite.SQLiteConnection.executeForLastInsertedRowId(SQLiteConnection.java:938)
+//        at android.database.sqlite.SQLiteSession.executeForLastInsertedRowId(SQLiteSession.java:790)
+//        at android.database.sqlite.SQLiteStatement.executeInsert(SQLiteStatement.java:88)
+//        at androidx.sqlite.db.framework.FrameworkSQLiteStatement.executeInsert(FrameworkSQLiteStatement.java:51)
+//        at androidx.room.EntityInsertionAdapter.insert(EntityInsertionAdapter.java:64)
+//        at com.example.feedme.database.DailyInfoDao_Impl.addDailyInfo(DailyInfoDao_Impl.java:77)
+//        at com.example.feedme.DailyInfoRepository$addDailyInfo$1.run(DailyInfoRepository.kt:34)
+//        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+//        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+//        at java.lang.Thread.run(Thread.java:923)
+
+//        dailyInfoListViewModel.getEntry(createDateForToday()).observe(
+//            this,
+//            androidx.lifecycle.Observer { entry: DailyInfo? ->
+//                // if entry for today does not exist
+//                if (entry == null) {
+//                    dailyInfoListViewModel.addDailyInfo(
+//                        DailyInfo(
+//                            createDateForToday(),
+//                            steps,
+//                            mealsEaten
+//                        )
+//                    )
+//                }
+//            }
+//        )
+
+    }
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun onResume() {
+        super.onResume()
+        if (!permissionRequestProcessDone) {
+            checkAuthorization()
+        } else {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 if (areWeInJapan(location)) {
                     changeUItoJapan()
                 }
+//                Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
             }
-            Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
+            getCurStepCount()
+            refresh(2000)
         }
-
-        dailyInfoListViewModel.dailyInfoLiveData.observe(
-            this,
-            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
-                Log.d(TAG, "There are ${entries.size} entries")
-                Log.d(
-                    TAG,
-                    "An entry looks like this: Date: ${entries[0].date}, Steps: ${entries[0].steps}, Times Eaten: ${entries[0].times_eaten}"
-                )
-                mochi_age_label.text = "Mochi Age: ${entries.size} days"
-            }
-        )
-
-        dailyInfoListViewModel.getEntry(createDateForToday()).observe(
-            this,
-            androidx.lifecycle.Observer { entry: DailyInfo? ->
-                // if entry for today does not exist
-                if (entry == null) {
-                    dailyInfoListViewModel.addDailyInfo(
-                        DailyInfo(
-                            createDateForToday(),
-                            steps,
-                            mealsEaten
-                        )
-                    )
-                }
-            }
-        )
-
     }
 
     /**
@@ -268,6 +308,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+
     /**
      * Checks to see if they have happy chomper award (ate 3x in one day). If not, give it to them
      */
@@ -284,25 +326,7 @@ class MainActivity : AppCompatActivity() {
         // todo give them award if >=100
     }
 
-    @SuppressLint("MissingPermission")
-    @RequiresApi(Build.VERSION_CODES.Q)
-    override fun onResume() {
-        super.onResume()
-        if (!permissionRequestProcessDone) {
-            checkAuthorization()
-        } else {
-            // For getting location
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                if (permissionRequestProcessDone) {
-                    if (areWeInJapan(location)) {
-                        changeUItoJapan()
-                    }
-                }
-                Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
-            }
-            getCurStepCount()
-        }
-    }
+
 
     /**
      * Checks to see if you are within 100 miles of Tokyo
@@ -314,7 +338,7 @@ class MainActivity : AppCompatActivity() {
             && (kotlin.math.abs((location?.longitude?.toFloat() ?: 0).toFloat() - 138.2529) < 2)
         ) {
             //  we are within 100ish miles of Tokyo!
-            Log.d(TAG, "We in japan!!")
+//            Log.d(TAG, "We in japan!!")
             // TODO add Japan award
             return true
         }
@@ -578,7 +602,6 @@ class MainActivity : AppCompatActivity() {
             subscribe()
         }
         if (permissionLocationDone) {
-
         } else {
 
             ActivityCompat.requestPermissions(
@@ -588,6 +611,9 @@ class MainActivity : AppCompatActivity() {
             )
         }
         permissionRequestProcessDone = permissionRecognitionDone && permissionLocationDone
+        if (permissionRequestProcessDone){
+            onResume()
+        }
     }
 
     private fun showExplanation(
@@ -758,7 +784,7 @@ class MainActivity : AppCompatActivity() {
                         if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
                             .asInt()
 //                                    Log.d(TAG, "current Step Count: $curSteps")
-                    steps = curSteps.toLong()
+//                    steps = curSteps.toLong()
                     step_counter.text = curSteps.toString()
                 }
                 .addOnFailureListener { e: java.lang.Exception ->
@@ -772,9 +798,7 @@ class MainActivity : AppCompatActivity() {
             step_counter.visibility = View.GONE
             step_tracker_icon.visibility = View.GONE
         }
-        if (permissionRequestProcessDone) {
-            refresh(2000)
-        }
+
     }
 
 
