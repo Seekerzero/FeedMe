@@ -47,7 +47,6 @@ private const val TAG = "MainActivity"
 private const val MY_PERMISSIONS_REQUEST_ACTIVITY_RECOGNITION = 0
 private const val MY_PERMISSIONS_REQUEST_ACTIVITY_LOCATION = 1
 private const val GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 2
-private const val MY_TEST_PERMISSIONS_REQUEST_CODE = 3
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mochi_name_label: EditText

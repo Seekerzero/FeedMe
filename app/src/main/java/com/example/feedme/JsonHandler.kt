@@ -14,7 +14,6 @@ private const val NumOfAwards = 9
 class JsonHandler(){
     val mochiInfo = MochiInfo("test", SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().time))
     var awardDates = mutableListOf<String>()
-    var awardNames = mutableListOf<String>()
 
 
     init {
