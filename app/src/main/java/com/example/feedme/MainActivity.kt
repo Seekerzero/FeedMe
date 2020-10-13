@@ -90,7 +90,11 @@ class MainActivity : AppCompatActivity() {
         if (!File(this.filesDir, "MochiInfo.json").exists()) {
             jsonHandler.createMochiInfoFile(this)
         }
-        jsonHandler.readMochiInfoFile(this)
+        jsonHandler.readMochiInfoFile(this) // todo ZhanHong I think this is causing some error:
+        // Caused by: org.json.JSONException: No value for AwardDate1
+        //        at org.json.JSONObject.get(JSONObject.java:392)
+        //        at com.example.feedme.JsonHandler.readMochiInfoFile(JsonHandler.kt:56)
+        //        at com.example.feedme.MainActivity.onCreate(MainActivity.kt:93)
 
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -168,64 +172,29 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // TODO: to Sabrina, I just found there are bugs here after first install, so I disable these function in temporally
-        // todo there is a bug here which will cause the app close after first install. something should be initialized before this.
-        // Process: com.example.feedme, PID: 31229
-        //    java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
-        //        at java.util.ArrayList.get(ArrayList.java:437)
-        //        at com.example.feedme.MainActivity$onCreate$5.onChanged(MainActivity.kt:186)
-        //        at com.example.feedme.MainActivity$onCreate$5.onChanged(MainActivity.kt:52)
-        //        at androidx.lifecycle.LiveData.considerNotify(LiveData.java:133)
-        //        at androidx.lifecycle.LiveData.dispatchingValue(LiveData.java:151)
-        //        at androidx.lifecycle.LiveData.setValue(LiveData.java:309)
-        //        at androidx.lifecycle.LiveData$1.run(LiveData.java:93)
-        //        at android.os.Handler.handleCallback(Handler.java:938)
-        //        at android.os.Handler.dispatchMessage(Handler.java:99)
-        //        at android.os.Looper.loop(Looper.java:223)
+        dailyInfoListViewModel.dailyInfoLiveData.observe(
+            this,
+            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
+                Log.d(TAG, "There are ${entries.size} entries")
+                mochi_age_label.text = "Mochi Age: ${entries.size} days"
+            }
+        )
 
-//        dailyInfoListViewModel.dailyInfoLiveData.observe(
-//            this,
-//            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
-//                Log.d(TAG, "There are ${entries.size} entries")
-//
-//                Log.d(
-//                    TAG,
-//                    "An entry looks like this: Date: ${entries[0].date}, Steps: ${entries[0].steps}, Times Eaten: ${entries[0].times_eaten}"
-//                )
-//                mochi_age_label.text = "Mochi Age: ${entries.size} days"
-//            }
-//        )
-
-        //todo also bug here I believe it should be the same type of problem
-//        Process: com.example.feedme, PID: 7957
-//        android.database.sqlite.SQLiteConstraintException: UNIQUE constraint failed: DailyInfo.date (code 1555 SQLITE_CONSTRAINT_PRIMARYKEY)
-//        at android.database.sqlite.SQLiteConnection.nativeExecuteForLastInsertedRowId(Native Method)
-//        at android.database.sqlite.SQLiteConnection.executeForLastInsertedRowId(SQLiteConnection.java:938)
-//        at android.database.sqlite.SQLiteSession.executeForLastInsertedRowId(SQLiteSession.java:790)
-//        at android.database.sqlite.SQLiteStatement.executeInsert(SQLiteStatement.java:88)
-//        at androidx.sqlite.db.framework.FrameworkSQLiteStatement.executeInsert(FrameworkSQLiteStatement.java:51)
-//        at androidx.room.EntityInsertionAdapter.insert(EntityInsertionAdapter.java:64)
-//        at com.example.feedme.database.DailyInfoDao_Impl.addDailyInfo(DailyInfoDao_Impl.java:77)
-//        at com.example.feedme.DailyInfoRepository$addDailyInfo$1.run(DailyInfoRepository.kt:34)
-//        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
-//        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
-//        at java.lang.Thread.run(Thread.java:923)
-
-//        dailyInfoListViewModel.getEntry(createDateForToday()).observe(
-//            this,
-//            androidx.lifecycle.Observer { entry: DailyInfo? ->
-//                // if entry for today does not exist
-//                if (entry == null) {
-//                    dailyInfoListViewModel.addDailyInfo(
-//                        DailyInfo(
-//                            createDateForToday(),
-//                            steps,
-//                            mealsEaten
-//                        )
-//                    )
-//                }
-//            }
-//        )
+        dailyInfoListViewModel.getEntry(createDateForToday()).observe(
+            this,
+            androidx.lifecycle.Observer { entry: DailyInfo? ->
+                // if entry for today does not exist
+                if (entry == null) {
+                    dailyInfoListViewModel.addDailyInfo(
+                        DailyInfo(
+                            createDateForToday(),
+                            steps,
+                            mealsEaten
+                        )
+                    )
+                }
+            }
+        )
 
     }
 
@@ -281,14 +250,10 @@ class MainActivity : AppCompatActivity() {
             DragEvent.ACTION_DROP -> {
                 // mochi happy
                 mealsEaten++
-
-                // make a strawberry bright
+                // make a food tracker bright
                 if (mealsEaten == 1) {
                     food_tracker_icon_1.clearColorFilter()
                     mochi_icon.setImageResource(R.drawable.green_mochi_happy)
-                    mochi_icon.maxHeight = 500
-                    mochi_icon.maxWidth = 500
-
                 } else if (mealsEaten == 2) {
                     food_tracker_icon_2.clearColorFilter()
                     mochi_icon.setImageResource(R.drawable.green_mochi_happy)
@@ -308,26 +273,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
-    /**
-     * Checks to see if they have happy chomper award (ate 3x in one day). If not, give it to them
-     */
-    private fun checkHappyChomperAward() {
-        // todo check if they have happy chomper award. Give if no
-
-    }
-
-    /**
-     * Checks mochi's age on start up to see if get 100 day award
-     */
-    private fun checkAgeAward() {
-        // todo check age based on birthday in json
-        // todo give them award if >=100
-    }
-
-
-
     /**
      * Checks to see if you are within 100 miles of Tokyo
      */
@@ -338,7 +283,6 @@ class MainActivity : AppCompatActivity() {
             && (kotlin.math.abs((location?.longitude?.toFloat() ?: 0).toFloat() - 138.2529) < 2)
         ) {
             //  we are within 100ish miles of Tokyo!
-//            Log.d(TAG, "We in japan!!")
             // TODO add Japan award
             return true
         }
@@ -351,163 +295,6 @@ class MainActivity : AppCompatActivity() {
         food_tracker_icon_1.setImageResource(R.drawable.food_tracker_icon1_jp)
         food_tracker_icon_2.setImageResource(R.drawable.food_tracker_icon2_jp)
         food_tracker_icon_3.setImageResource(R.drawable.food_tracker_icon3_jp)
-    }
-
-    /**
-     * Award setting function for walking 2000 steps for the last 7 days
-     */
-    private fun got2000_7award() {
-        if (walk2000_7days()) {
-            // they get award
-        }
-        // set award todo
-    }
-
-    /**
-     * Helper function
-     * Calculate whether you have gotten 2000 steps in past 7 days
-     */
-    private fun walk2000_7days(): Boolean {
-        var past7days: MutableList<String> = pastDaysDates(7)
-        var dateDoesNotExistOrQualify = false
-        for (date in past7days) {
-            // get entry
-            dailyInfoListViewModel.getEntry(date).observe(
-                this,
-                androidx.lifecycle.Observer { entry: DailyInfo? ->
-                    // if entry for today does not exist or did not take more than 2000 steps
-                    if ((entry == null) || (entry.steps < 2000)) {
-                        dateDoesNotExistOrQualify = true
-                    }
-                }
-            )
-            if (dateDoesNotExistOrQualify) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Award setting function for eating 3 meals a day for the last 7 days
-     */
-    private fun ate_3_meals_7_days() {
-        if (ate_3_meals_7_days_check()) {
-            // they get award
-        }
-        // set award todo
-    }
-
-    /**
-     * Helper function
-     * Calculate whether you have gotten 2000 steps in past 7 days
-     */
-    private fun ate_3_meals_7_days_check(): Boolean {
-        var past7days: MutableList<String> = pastDaysDates(7)
-        var dateDoesNotExistOrQualify = false
-        for (date in past7days) {
-            // get entry
-            dailyInfoListViewModel.getEntry(date).observe(
-                this,
-                androidx.lifecycle.Observer { entry: DailyInfo? ->
-                    // if entry for today does not exist or did not take more than 2000 steps
-                    if ((entry == null) || (entry.times_eaten < 3)) {
-                        dateDoesNotExistOrQualify = true
-                    }
-                }
-            )
-            if (dateDoesNotExistOrQualify) {
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * Check to see if ate 3 times a day and walked 2000 steps for last 7 consecutive days
-     */
-    private fun setAwards_3meals_2000steps() {
-        // todo if don't have award
-        // and if (helper_3meals_2000steps()){} // then give award!
-    }
-
-    private fun helper_3meals_2000steps(): Boolean {
-        var past7days: MutableList<String> = pastDaysDates(7)
-        var dateDoesNotExist = false
-        var walkedAndAte = false
-        for (date in past7days) {
-            // get entry
-            dailyInfoListViewModel.getEntry(date).observe(
-                this,
-                androidx.lifecycle.Observer { entry: DailyInfo? ->
-                    // if entry for today does not exist or did not take more than 2000 steps
-                    if (entry == null) {
-                        dateDoesNotExist = true
-                    } else { // not null
-                        if ((entry.times_eaten >= 3) && (entry.steps >= 2000)) {
-                            walkedAndAte = true
-                        }
-                    }
-                }
-            )
-            // if entry for date doesn't exist, or didn't eat 3 times, or didn't walk 2000 steps today
-            if (dateDoesNotExist || !walkedAndAte) {
-                return false
-            }
-            // reset 3x eating and 2000 steps flag for next loop
-            walkedAndAte = false
-        }
-        return true
-    }
-
-    /**
-     * Check to see if ate 3 times a day for last 30 consecutive days
-     */
-    private fun setAwards_3meals_30days() {
-        // todo if don't have award
-        // and if (helper_3meals_30days()){} // then give award!
-    }
-
-    private fun helper_3meals_30days(): Boolean {
-        var past7days: MutableList<String> = pastDaysDates(30)
-        var dateDoesNotExist = false
-        var ate = false
-        for (date in past7days) {
-            // get entry
-            dailyInfoListViewModel.getEntry(date).observe(
-                this,
-                androidx.lifecycle.Observer { entry: DailyInfo? ->
-                    // if entry for today does not exist or did not take more than 2000 steps
-                    if (entry == null) {
-                        dateDoesNotExist = true
-                    } else { // not null
-                        if (entry.times_eaten >= 3) {
-                            ate = true
-                        }
-                    }
-                }
-            )
-            // if entry for date doesn't exist, or didn't eat 3 times, or didn't walk 2000 steps today
-            if (dateDoesNotExist || !ate) {
-                return false
-            }
-            // reset 3x eating flag for next loop
-            ate = false
-        }
-        return true
-    }
-
-    /**
-     * Helper function to create dates for past 7 days
-     */
-    private fun pastDaysDates(numDays: Int): MutableList<String> {
-        var dates: MutableList<String> = mutableListOf()
-        var today: String = createDateForToday()
-        dates.add(today)
-        for (i in 1 until (numDays + 1)) {
-            dates.add((today.toInt() - i).toString())
-        }
-        return dates
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -799,6 +586,184 @@ class MainActivity : AppCompatActivity() {
             step_tracker_icon.visibility = View.GONE
         }
 
+    }
+    /**
+     * *********************************************************************************************
+     * Functions for checking and assigning awards
+     * *********************************************************************************************
+     */
+
+    /**
+     * Checks to see if they have happy chomper award (ate 3x in one day). If not, give it to them
+     */
+    private fun checkHappyChomperAward() {
+        // todo check if they have happy chomper award. Give if no
+
+    }
+
+    /**
+     * Checks mochi's age on start up to see if get 100 day award
+     */
+    private fun checkAgeAward() {
+        // todo check age based on birthday in json
+        // todo give them award if >=100
+    }
+
+    /**
+     * Award setting function for walking 2000 steps for the last 7 days
+     */
+    private fun got2000_7award() {
+        if (walk2000_7days()) {
+            // they get award
+        }
+        // set award todo
+    }
+
+    /**
+     * Helper function
+     * Calculate whether you have gotten 2000 steps in past 7 days
+     */
+    private fun walk2000_7days(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(7)
+        var dateDoesNotExistOrQualify = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if ((entry == null) || (entry.steps < 2000)) {
+                        dateDoesNotExistOrQualify = true
+                    }
+                }
+            )
+            if (dateDoesNotExistOrQualify) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * Award setting function for eating 3 meals a day for the last 7 days
+     */
+    private fun ate_3_meals_7_days() {
+        if (ate_3_meals_7_days_check()) {
+            // they get award
+        }
+        // set award todo
+    }
+
+    /**
+     * Helper function
+     * Calculate whether you have gotten 2000 steps in past 7 days
+     */
+    private fun ate_3_meals_7_days_check(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(7)
+        var dateDoesNotExistOrQualify = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if ((entry == null) || (entry.times_eaten < 3)) {
+                        dateDoesNotExistOrQualify = true
+                    }
+                }
+            )
+            if (dateDoesNotExistOrQualify) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * Check to see if ate 3 times a day and walked 2000 steps for last 7 consecutive days
+     */
+    private fun setAwards_3meals_2000steps() {
+        // todo if don't have award
+        // and if (helper_3meals_2000steps()){} // then give award!
+    }
+
+    private fun helper_3meals_2000steps(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(7)
+        var dateDoesNotExist = false
+        var walkedAndAte = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if (entry == null) {
+                        dateDoesNotExist = true
+                    } else { // not null
+                        if ((entry.times_eaten >= 3) && (entry.steps >= 2000)) {
+                            walkedAndAte = true
+                        }
+                    }
+                }
+            )
+            // if entry for date doesn't exist, or didn't eat 3 times, or didn't walk 2000 steps today
+            if (dateDoesNotExist || !walkedAndAte) {
+                return false
+            }
+            // reset 3x eating and 2000 steps flag for next loop
+            walkedAndAte = false
+        }
+        return true
+    }
+
+    /**
+     * Check to see if ate 3 times a day for last 30 consecutive days
+     */
+    private fun setAwards_3meals_30days() {
+        // todo if don't have award
+        // and if (helper_3meals_30days()){} // then give award!
+    }
+
+    private fun helper_3meals_30days(): Boolean {
+        var past7days: MutableList<String> = pastDaysDates(30)
+        var dateDoesNotExist = false
+        var ate = false
+        for (date in past7days) {
+            // get entry
+            dailyInfoListViewModel.getEntry(date).observe(
+                this,
+                androidx.lifecycle.Observer { entry: DailyInfo? ->
+                    // if entry for today does not exist or did not take more than 2000 steps
+                    if (entry == null) {
+                        dateDoesNotExist = true
+                    } else { // not null
+                        if (entry.times_eaten >= 3) {
+                            ate = true
+                        }
+                    }
+                }
+            )
+            // if entry for date doesn't exist, or didn't eat 3 times, or didn't walk 2000 steps today
+            if (dateDoesNotExist || !ate) {
+                return false
+            }
+            // reset 3x eating flag for next loop
+            ate = false
+        }
+        return true
+    }
+
+    /**
+     * Helper function to create dates for past 7 days
+     */
+    private fun pastDaysDates(numDays: Int): MutableList<String> {
+        var dates: MutableList<String> = mutableListOf()
+        var today: String = createDateForToday()
+        dates.add(today)
+        for (i in 1 until (numDays + 1)) {
+            dates.add((today.toInt() - i).toString())
+        }
+        return dates
     }
 
 
