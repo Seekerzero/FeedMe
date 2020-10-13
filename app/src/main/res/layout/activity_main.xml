@@ -29,7 +29,7 @@
     <ImageView
         android:id="@+id/food_tracker_holder"
         android:layout_width="166dp"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:paddingLeft="-50dp"
         android:src="@drawable/food_tracker_background_us"
         app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
         android:id="@+id/food_tracker_icon2"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginTop="8dp"
         android:src="@drawable/food_tracker_icon2_us"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon1"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
@@ -50,7 +50,7 @@
         android:id="@+id/food_tracker_icon3"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginTop="8dp"
         android:src="@drawable/food_tracker_icon3_us"
         app:layout_constraintStart_toEndOf="@+id/food_tracker_icon2"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
@@ -59,8 +59,8 @@
         android:id="@+id/food_tracker_icon1"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginStart="21dp"
+        android:layout_marginTop="8dp"
         android:src="@drawable/food_tracker_icon1_us"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/food_tracker_holder" />
@@ -83,7 +83,7 @@
         android:textAlignment="center"
         android:textColor="#BCC8CE"
         android:textSize="32sp"
-        android:text="12345"
+        android:text="0"
         app:layout_constraintEnd_toEndOf="@+id/step_tracker_icon"
         app:layout_constraintTop_toTopOf="parent" />
 
