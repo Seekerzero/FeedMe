@@ -15,7 +15,6 @@ class JsonHandler(){
     val mochiInfo = MochiInfo("test", SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().time))
     var awardDates = mutableListOf<String>()
 
-
     init {
         for(i in 0 until NumOfAwards){
             awardDates.add("00000000")
