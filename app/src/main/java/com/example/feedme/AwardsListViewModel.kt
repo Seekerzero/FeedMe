@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 private const val TAG = "AwardsListViewModel"
 
 class AwardsListViewModel : ViewModel() {
+    var jsonHandler = JsonHandler()
 
     // create list of all awards
     var awards: MutableMap<String, Award> = mutableMapOf(

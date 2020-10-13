@@ -39,6 +39,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var layout: ConstraintLayout
     private var mochi_name: String? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var steps: Long = 0
+    private var steps: Long = 5002
     var mealsEaten = 0
     var stepCounterEnabled: Boolean = true
     var permissionRecognitionDone = false
@@ -90,14 +91,10 @@ class MainActivity : AppCompatActivity() {
         if (!File(this.filesDir, "MochiInfo.json").exists()) {
             jsonHandler.createMochiInfoFile(this)
         }
-        jsonHandler.readMochiInfoFile(this) // todo ZhanHong I think this is causing some error:
-        // Caused by: org.json.JSONException: No value for AwardDate1
-        //        at org.json.JSONObject.get(JSONObject.java:392)
-        //        at com.example.feedme.JsonHandler.readMochiInfoFile(JsonHandler.kt:56)
-        //        at com.example.feedme.MainActivity.onCreate(MainActivity.kt:93)
-
+        jsonHandler.readMochiInfoFile(this)
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        jsonHandler.mochiInfo.birthday = "20200110"
 
         // Wire up widgets
         layout = findViewById(R.id.constraint_layout_parent)
@@ -115,6 +112,7 @@ class MainActivity : AppCompatActivity() {
         instructions_button = findViewById(R.id.instructions_icon)
         step_counter = findViewById(R.id.step_tracker_number)
 
+        mochi_name_label.hint = jsonHandler.mochiInfo.name
         // set listeners
         mochi_name_label.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
@@ -133,6 +131,7 @@ class MainActivity : AppCompatActivity() {
                 before: Int, count: Int
             ) {
                 mochi_name = s.toString()
+                mochi_name_label.hint = s.toString()
                 mochi_name_label.setTextColor(getResources().getColor(R.color.green))
             }
         })
@@ -172,13 +171,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        dailyInfoListViewModel.dailyInfoLiveData.observe(
-            this,
-            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
-                Log.d(TAG, "There are ${entries.size} entries")
-                mochi_age_label.text = "Mochi Age: ${entries.size} days"
-            }
-        )
+        mochi_age_label.text = "Mochi age: " + checkAgeAward().toString()
+
 
         dailyInfoListViewModel.getEntry(createDateForToday()).observe(
             this,
@@ -195,7 +189,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-
     }
 
     @SuppressLint("MissingPermission")
@@ -209,11 +202,17 @@ class MainActivity : AppCompatActivity() {
                 if (areWeInJapan(location)) {
                     changeUItoJapan()
                 }
-//                Log.d(TAG, "Current coordinates: ${location?.latitude}, ${location?.longitude}")
             }
             getCurStepCount()
+            updateDailyInfoAndAwards()
             refresh(2000)
         }
+
+        // Check awards
+        got2000_7award()
+        ate_3_meals_7_days()
+        setAwards_3meals_2000steps()
+        setAwards_3meals_30days()
     }
 
     /**
@@ -283,7 +282,11 @@ class MainActivity : AppCompatActivity() {
             && (kotlin.math.abs((location?.longitude?.toFloat() ?: 0).toFloat() - 138.2529) < 2)
         ) {
             //  we are within 100ish miles of Tokyo!
-            // TODO add Japan award
+            if (!doTheyHaveThisAward(Awards.TRAVELLER.awardName)) {
+                jsonHandler.updateAwardDate(Awards.TRAVELLER.awardName, createDateForToday())
+                jsonHandler.createMochiInfoFile(this)
+                jsonHandler.readMochiInfoFile(this)
+            }
             return true
         }
         return false
@@ -338,11 +341,15 @@ class MainActivity : AppCompatActivity() {
             )
         )
         // check step count for today
-        if (steps >= 2000) {
-            // todo give award
+        if ((steps >= 2000) && !doTheyHaveThisAward(Awards.WALK_1.awardName)) {
+            jsonHandler.updateAwardDate(Awards.WALK_1.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
         }
-        if (steps >= 5000) {
-            // todo give award
+        if ((steps >= 5000) && !doTheyHaveThisAward(Awards.WALK_3.awardName)) {
+            jsonHandler.updateAwardDate(Awards.WALK_3.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
         }
     }
 
@@ -571,7 +578,7 @@ class MainActivity : AppCompatActivity() {
                         if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
                             .asInt()
 //                                    Log.d(TAG, "current Step Count: $curSteps")
-//                    steps = curSteps.toLong()
+                    steps = 2001//curSteps.toLong()
                     step_counter.text = curSteps.toString()
                 }
                 .addOnFailureListener { e: java.lang.Exception ->
@@ -587,36 +594,52 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
     /**
      * *********************************************************************************************
      * Functions for checking and assigning awards
      * *********************************************************************************************
      */
 
+    private fun doTheyHaveThisAward(award: String): Boolean {
+        return (jsonHandler.getAwardDate(award) != "00000000")
+    }
+
     /**
      * Checks to see if they have happy chomper award (ate 3x in one day). If not, give it to them
      */
     private fun checkHappyChomperAward() {
-        // todo check if they have happy chomper award. Give if no
-
+        if (!doTheyHaveThisAward(Awards.HEALTH_1.awardName)) {
+            jsonHandler.updateAwardDate(Awards.HEALTH_1.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
+        }
     }
 
     /**
      * Checks mochi's age on start up to see if get 100 day award
      */
-    private fun checkAgeAward() {
-        // todo check age based on birthday in json
-        // todo give them award if >=100
+    private fun checkAgeAward(): Long {
+        var birthdate = SimpleDateFormat("yyyyMMdd").parse(jsonHandler.mochiInfo.birthday)
+        var difference: Long = Date().time - birthdate.time
+        var age = TimeUnit.DAYS.convert(difference, TimeUnit.MILLISECONDS)
+        if (age >= 100 && !doTheyHaveThisAward(Awards.AGE.awardName)) {
+            jsonHandler.updateAwardDate(Awards.AGE.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
+        }
+        return age
     }
 
     /**
      * Award setting function for walking 2000 steps for the last 7 days
      */
     private fun got2000_7award() {
-        if (walk2000_7days()) {
-            // they get award
+        if (walk2000_7days() && !doTheyHaveThisAward(Awards.WALK_2.awardName)) {
+            jsonHandler.updateAwardDate(Awards.WALK_2.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
         }
-        // set award todo
     }
 
     /**
@@ -648,10 +671,11 @@ class MainActivity : AppCompatActivity() {
      * Award setting function for eating 3 meals a day for the last 7 days
      */
     private fun ate_3_meals_7_days() {
-        if (ate_3_meals_7_days_check()) {
-            // they get award
+        if (ate_3_meals_7_days_check() && !doTheyHaveThisAward(Awards.HEALTH_7.awardName)) {
+            jsonHandler.updateAwardDate(Awards.HEALTH_7.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
         }
-        // set award todo
     }
 
     /**
@@ -683,8 +707,11 @@ class MainActivity : AppCompatActivity() {
      * Check to see if ate 3 times a day and walked 2000 steps for last 7 consecutive days
      */
     private fun setAwards_3meals_2000steps() {
-        // todo if don't have award
-        // and if (helper_3meals_2000steps()){} // then give award!
+        if (helper_3meals_2000steps() && !doTheyHaveThisAward(Awards.HAPPY_MOCHI.awardName)) {
+            jsonHandler.updateAwardDate(Awards.HAPPY_MOCHI.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
+        }
     }
 
     private fun helper_3meals_2000steps(): Boolean {
@@ -720,8 +747,11 @@ class MainActivity : AppCompatActivity() {
      * Check to see if ate 3 times a day for last 30 consecutive days
      */
     private fun setAwards_3meals_30days() {
-        // todo if don't have award
-        // and if (helper_3meals_30days()){} // then give award!
+        if (helper_3meals_30days() && !doTheyHaveThisAward(Awards.HEALTH_30.awardName)) {
+            jsonHandler.updateAwardDate(Awards.HEALTH_30.awardName, createDateForToday())
+            jsonHandler.createMochiInfoFile(this)
+            jsonHandler.readMochiInfoFile(this)
+        }
     }
 
     private fun helper_3meals_30days(): Boolean {

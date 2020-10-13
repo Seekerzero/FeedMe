@@ -19,7 +19,7 @@ class AwardDetailFragment : Fragment() {
     private lateinit var award_icon: ImageView
     private lateinit var award_date_label: TextView
     private var award_name: String? = null
-
+    var jsonHandler = JsonHandler()
     private var current_award: Award? = null
     private val awardsListViewModel: AwardsListViewModel by lazy {
         ViewModelProviders.of(this).get(AwardsListViewModel::class.java)
@@ -32,7 +32,7 @@ class AwardDetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_award, container, false)
-        award_name = arguments?.getSerializable(CLICKED_AWARD_NAME) as String?
+        award_name = arguments?.getSerializable(CLICKED_AWARD_NAME) as String? ?: ""
         award_title_label = view.findViewById(R.id.award_name_label)
         award_description = view.findViewById(R.id.award_description)
         award_icon = view.findViewById(R.id.award_icon)
@@ -45,15 +45,28 @@ class AwardDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        this.context?.let { jsonHandler.readMochiInfoFile(it) }
         current_award = awardsListViewModel.awards[award_name]
         award_icon.setImageResource(current_award?.award_icon ?: R.id.award_icon)
         award_title_label.text = (current_award?.award_name ?: "Award Name")
         award_description.setText(
             current_award?.award_description_string_resource ?: R.string.award_description_null
         )
-        award_date_label.text = (current_award?.award_date?.toString()
-            ?: "Award not earned yet") // TODO when user gets award, set date!
 
+        if (award_name?.let { jsonHandler.getAwardDate(it) } == "00000000") {
+            award_date_label.text = "Award not earned yet"
+        } else {
+            var stringToFormat = (award_name?.let { jsonHandler.getAwardDate(it) }).toString()
+            award_date_label.text = formatDateString(stringToFormat)
+        }
+
+    }
+
+    private fun formatDateString(stringToFormat: String): String {
+        var yearString = stringToFormat.substring(0, 4)
+        var monthString = stringToFormat.substring(4, 6)
+        var dayString = stringToFormat.substring(6, 8)
+        return yearString + "/" + monthString + "/" + dayString
     }
 
     companion object {
