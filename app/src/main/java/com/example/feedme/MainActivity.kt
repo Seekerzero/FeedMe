@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         jsonHandler.readMochiInfoFile(this)
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        jsonHandler.mochiInfo.birthday = "20200110"
+//        jsonHandler.mochiInfo.birthday = "20200110" todo keep for video
 
         // Wire up widgets
         layout = findViewById(R.id.constraint_layout_parent)
@@ -144,7 +144,6 @@ class MainActivity : AppCompatActivity() {
                 arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),
                 item
             )
-            Log.d(TAG, "Food icon long clicked")
             // instantiate drag shadow builder
             val myShadow = DragShadowBuilder(food_icon)
             // start drag
@@ -185,9 +184,43 @@ class MainActivity : AppCompatActivity() {
                             mealsEaten
                         )
                     )
+                } else {
+                    Log.d(TAG, "Meals eaten today based on DB entry: ${entry.times_eaten}")
+                    steps = entry.steps
+                    mealsEaten = entry.times_eaten
+                    loadFoodFromDB()
                 }
             }
         )
+
+        dailyInfoListViewModel.dailyInfoLiveData.observe(
+            this,
+            androidx.lifecycle.Observer { entries: List<DailyInfo> ->
+                // if entry for today does not exist
+                // for debugging!
+//                Log.d(TAG, "entries in DB: ${entries.size}")
+            }
+        )
+    }
+
+    /**
+     * Function to make sure that the UI reflects whether the DB has an entry for today already
+     */
+    private fun loadFoodFromDB() {
+        when {
+            mealsEaten == 1 -> {
+                food_tracker_icon_1.clearColorFilter()
+            }
+            mealsEaten == 2 -> {
+                food_tracker_icon_1.clearColorFilter()
+                food_tracker_icon_2.clearColorFilter()
+            }
+            mealsEaten >= 3 -> {
+                food_tracker_icon_1.clearColorFilter()
+                food_tracker_icon_2.clearColorFilter()
+                food_tracker_icon_3.clearColorFilter()
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -203,7 +236,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             getCurStepCount()
-            updateDailyInfoAndAwards()
             refresh(2000)
         }
 
@@ -322,7 +354,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // update with daily info
-        Log.d(TAG, "Updating daily info database")
         try {
             updateDailyInfoAndAwards()
         } catch (e: Exception) {
@@ -330,7 +361,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        updateDailyInfoAndAwards()
+    }
+
     private fun updateDailyInfoAndAwards() {
+        Log.d(TAG, "Updating DB and awards")
         // add or update today's entry with ending steps and meals eaten
         dailyInfoListViewModel.updateDailyInfo(
             DailyInfo(
@@ -754,10 +791,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun helper_3meals_30days(): Boolean {
-        var past7days: MutableList<String> = pastDaysDates(30)
+        var past30days: MutableList<String> = pastDaysDates(30)
         var dateDoesNotExist = false
         var ate = false
-        for (date in past7days) {
+        for (date in past30days) {
             // get entry
             dailyInfoListViewModel.getEntry(date).observe(
                 this,
