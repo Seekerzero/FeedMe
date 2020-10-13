@@ -12,7 +12,8 @@ private const val TAG = "JSON_HANDLER"
 private const val NumOfAwards = 9
 
 class JsonHandler(){
-    val mochiInfo = MochiInfo("test", SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().time))
+    val mochiInfo =
+        MochiInfo("mochi name", SimpleDateFormat("yyyyMMdd").format(Calendar.getInstance().time))
     var awardDates = mutableListOf<String>()
 
     init {

@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         jsonHandler.readMochiInfoFile(this)
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-//        jsonHandler.mochiInfo.birthday = "20200110" todo keep for video
+        jsonHandler.mochiInfo.birthday = "20200831"// todo keep for video
 
         // Wire up widgets
         layout = findViewById(R.id.constraint_layout_parent)
@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        mochi_age_label.text = "Mochi age: " + checkAgeAward().toString()
+        mochi_age_label.text = "Mochi age: " + checkAgeAward().toString() + " days"
 
 
         dailyInfoListViewModel.getEntry(createDateForToday()).observe(
