@@ -2,6 +2,9 @@ package com.example.feedme
 
 import java.util.*
 
+/**
+ * For use in the Awards List View Model
+ */
 data class Award(
     val award_name: String,
     val award_date: Date?,

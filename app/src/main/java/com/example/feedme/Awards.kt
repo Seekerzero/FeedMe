@@ -1,5 +1,8 @@
 package com.example.feedme
 
+/**
+ * Enum for all 9 awards to use in AwardListViewModel
+ */
 enum class Awards(val awardName: String, val description: Int, val icon: Int) {
     HEALTH_1(
         "Happy Chomper",
