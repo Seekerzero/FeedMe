@@ -407,14 +407,6 @@ class MainActivity : AppCompatActivity() {
         return code ?: 0
     }
 
-    private fun getPermissionName(permission: String): String {
-        val name = when (permission) {
-            "android.permission.ACTIVITY_RECOGNITION" -> "Accessing your Physics Activity"
-            "android.permission.ACCESS_COARSE_LOCATION" -> "Accessing your Location"
-            else -> null
-        }
-        return name ?: "Unknown Activity "
-    }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun checkAuthorization() {
@@ -455,25 +447,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showExplanation(
-        title: String,
-        message: String,
-        permission: String,
-        permissionRequestCode: Int
-    ): Boolean {
-        var result = false
-        val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(this)
-        builder.setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(
-                android.R.string.ok
-            ) { dialog, id ->
-                result = true
-                requestPermissions(arrayOf(permission), getPermissionCode(permission))
-            }
-        builder.create().show()
-        return result
-    }
 
     private fun prepareGoogleFitClient() {
 
@@ -575,7 +548,7 @@ class MainActivity : AppCompatActivity() {
                 for (sc in subscriptions) {
                     val dt: DataType? = sc.dataType
                     if (dt != null) {
-                        Log.i(TAG, "Active subscription for data type: " + dt.name)
+//                        Log.i(TAG, "Active subscription for data type: " + dt.name)
                         if (dt.name == "com.google.step_count.cumulative") {
                             Log.i(
                                 TAG,
@@ -623,7 +596,7 @@ class MainActivity : AppCompatActivity() {
                         if (result.isEmpty) 0 else result.dataPoints[0].getValue(Field.FIELD_STEPS)
                             .asInt()
 //                                    Log.d(TAG, "current Step Count: $curSteps")
-                    steps = 2001//curSteps.toLong()
+                    steps = curSteps.toLong()
                     step_counter.text = curSteps.toString()
                 }
                 .addOnFailureListener { e: java.lang.Exception ->

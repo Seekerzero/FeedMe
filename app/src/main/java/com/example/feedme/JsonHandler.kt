@@ -20,7 +20,7 @@ class JsonHandler(){
         for(i in 0 until NumOfAwards){
             awardDates.add("00000000")
         }
-       print("Finished Initialized award date list with size of ${awardDates.size}\n")
+//       print("Finished Initialized award date list with size of ${awardDates.size}\n")
     }
 
 
@@ -37,7 +37,7 @@ class JsonHandler(){
         val bufferedWriter = BufferedWriter(filewriter)
         bufferedWriter.write(mochiInfoString)
         bufferedWriter.close()
-        Log.d(TAG, "creating info file: $mochiInfoString")
+//        Log.d(TAG, "creating info file: $mochiInfoString")
     }
 
     fun readMochiInfoFile(context: Context){
@@ -45,7 +45,7 @@ class JsonHandler(){
         val fileReader = FileReader(file)
         val bufferedReader = BufferedReader(fileReader)
         var line: String = bufferedReader.readLine()
-        Log.d(TAG, "getting info file: $line")
+//        Log.d(TAG, "getting info file: $line")
         bufferedReader.close()
         val jsonObject = JSONObject(line)
         mochiInfo.name = jsonObject.get("Name").toString()
