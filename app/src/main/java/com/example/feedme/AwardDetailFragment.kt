@@ -46,13 +46,14 @@ class AwardDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         this.context?.let { jsonHandler.readMochiInfoFile(it) }
+        // get current award's information from the AwardsListViewModel
         current_award = awardsListViewModel.awards[award_name]
         award_icon.setImageResource(current_award?.award_icon ?: R.id.award_icon)
         award_title_label.text = (current_award?.award_name ?: "Award Name")
         award_description.setText(
             current_award?.award_description_string_resource ?: R.string.award_description_null
         )
-
+        // get date earned for the current award from the JSON
         if (award_name?.let { jsonHandler.getAwardDate(it) } == "00000000") {
             award_date_label.text = "Award not earned yet"
         } else {
@@ -62,6 +63,10 @@ class AwardDetailFragment : Fragment() {
 
     }
 
+    /**
+     * Function to prettify an award date gotten from the JSON file
+     * "20201010" -> "2020/10/10"
+     */
     private fun formatDateString(stringToFormat: String): String {
         var yearString = stringToFormat.substring(0, 4)
         var monthString = stringToFormat.substring(4, 6)

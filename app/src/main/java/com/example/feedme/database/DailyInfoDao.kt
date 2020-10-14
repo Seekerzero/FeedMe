@@ -20,7 +20,4 @@ interface DailyInfoDao {
 
     @Insert
     fun addDailyInfo(dailyInfo: DailyInfo)
-
-//    @Query ("SELECT * FROM dailyInfo WHERE dat")
-
 }

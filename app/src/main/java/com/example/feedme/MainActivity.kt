@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var layout: ConstraintLayout
     private var mochi_name: String? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var steps: Long = 5002
+    private var steps: Long = 0//todo for video //5002
     var mealsEaten = 0
     var stepCounterEnabled: Boolean = true
     var permissionRecognitionDone = false
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         jsonHandler.readMochiInfoFile(this)
         dailyInfoListViewModel.initializeWithDummyData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        jsonHandler.mochiInfo.birthday = "20200831"// todo keep for video
+//        jsonHandler.mochiInfo.birthday = "20200831"// todo for video
 
         // Wire up widgets
         layout = findViewById(R.id.constraint_layout_parent)
@@ -112,7 +112,9 @@ class MainActivity : AppCompatActivity() {
         step_counter = findViewById(R.id.step_tracker_number)
 
         mochi_name_label.hint = jsonHandler.mochiInfo.name
+
         // set listeners
+        // listener for mochi name label
         mochi_name_label.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 jsonHandler.mochiInfo.name = s.toString()
@@ -135,7 +137,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // for dragging to mochi
+        // for dragging food to mochi
         food_icon.setOnLongClickListener { v: View ->
             // Create a new ClipData
             val item = ClipData.Item(v.tag as? CharSequence)
@@ -265,7 +267,7 @@ class MainActivity : AppCompatActivity() {
             DragEvent.ACTION_DRAG_STARTED -> {
                 true
             }
-            DragEvent.ACTION_DRAG_ENTERED -> {
+            DragEvent.ACTION_DRAG_ENTERED -> { // mochi happy to eat
                 mochi_icon.setImageResource(R.drawable.green_mochi_eat_happy)
                 true
             }
@@ -277,7 +279,7 @@ class MainActivity : AppCompatActivity() {
                 mochi_icon.setImageResource(R.drawable.green_mochi_ok)
                 true
             }
-            DragEvent.ACTION_DROP -> {
+            DragEvent.ACTION_DROP -> { // dropped food on mochi
                 // mochi happy
                 mealsEaten++
                 // make a food tracker bright
@@ -323,6 +325,9 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
+    /**
+     * Helper function to change UI if we are in Japan
+     */
     private fun changeUItoJapan() {
         // change background and theme
         layout.setBackgroundResource(R.drawable.background)
@@ -353,9 +358,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // update with daily info
         try {
-            updateDailyInfoAndAwards()
+            updateDailyInfoAndAwards()        // update with daily info
         } catch (e: Exception) {
             Log.e(TAG, e.localizedMessage)
         }
@@ -363,9 +367,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        updateDailyInfoAndAwards()
+        updateDailyInfoAndAwards()        // update with daily info
     }
 
+    /**
+     * Runs when pause or destroy
+     * Updates daily info database with number of steps for today and meals
+     * Checks some one-time awards (2,000 or 5,000 steps in one day)
+     */
     private fun updateDailyInfoAndAwards() {
         Log.d(TAG, "Updating DB and awards")
         // add or update today's entry with ending steps and meals eaten
@@ -637,8 +646,24 @@ class MainActivity : AppCompatActivity() {
      * *********************************************************************************************
      */
 
+    /**
+     * Helper function to check the JSON if they have a certain award
+     */
     private fun doTheyHaveThisAward(award: String): Boolean {
-        return (jsonHandler.getAwardDate(award) != "00000000")
+        return (jsonHandler.getAwardDate(award) != "00000000") // Date earned will be "00000000" if they haven't earned it yet
+    }
+
+    /**
+     * Helper function to create dates for past N number of days
+     */
+    private fun pastDaysDates(numDays: Int): MutableList<String> {
+        var dates: MutableList<String> = mutableListOf()
+        var today: String = createDateForToday()
+        dates.add(today)
+        for (i in 1 until (numDays + 1)) {
+            dates.add((today.toInt() - i).toString())
+        }
+        return dates
     }
 
     /**
@@ -750,6 +775,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Helper function to see if they have eaten 3 meals and gotten 2,000 steps per day for 7 consecutive days
+     */
     private fun helper_3meals_2000steps(): Boolean {
         var past7days: MutableList<String> = pastDaysDates(7)
         var dateDoesNotExist = false
@@ -790,6 +818,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Helper function to see if they have eaten 3 meals per day for 30 consecutive days
+     */
     private fun helper_3meals_30days(): Boolean {
         var past30days: MutableList<String> = pastDaysDates(30)
         var dateDoesNotExist = false
@@ -818,19 +849,4 @@ class MainActivity : AppCompatActivity() {
         }
         return true
     }
-
-    /**
-     * Helper function to create dates for past 7 days
-     */
-    private fun pastDaysDates(numDays: Int): MutableList<String> {
-        var dates: MutableList<String> = mutableListOf()
-        var today: String = createDateForToday()
-        dates.add(today)
-        for (i in 1 until (numDays + 1)) {
-            dates.add((today.toInt() - i).toString())
-        }
-        return dates
-    }
-
-
 }
